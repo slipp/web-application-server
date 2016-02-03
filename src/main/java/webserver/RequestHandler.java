@@ -35,6 +35,10 @@ public class RequestHandler extends Thread {
 		try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 			String line = br.readLine();
+			if (line == null) {
+				return;
+			}
+
 			String[] tokens = line.split(" ");
 
 			int contentLength = 0;
@@ -65,10 +69,10 @@ public class RequestHandler extends Thread {
 						DataOutputStream dos = new DataOutputStream(out);
 						response302LoginSuccessHeader(dos);
 					} else {
-						responseResource(out, "/loginFail.html");
+						responseResource(out, "/user/login_failed.html");
 					}
 				} else {
-					responseResource(out, "/loginFail.html");
+					responseResource(out, "/user/login_failed.html");
 				}
 			} else if (url.endsWith(".css")) {
 				responseCssResource(out, url);
