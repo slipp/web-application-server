@@ -9,15 +9,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
+
+import model.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import db.DataBase;
-import model.User;
 import util.HttpRequestUtils;
 import util.IOUtils;
+import db.DataBase;
 
 public class RequestHandler extends Thread {
 	private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -29,8 +31,7 @@ public class RequestHandler extends Thread {
 	}
 
 	public void run() {
-		log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-				connection.getPort());
+		log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
 		try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
@@ -42,11 +43,15 @@ public class RequestHandler extends Thread {
 			String[] tokens = line.split(" ");
 
 			int contentLength = 0;
+			boolean logined = false;
 			while (!line.equals("")) {
 				log.debug("header : {}", line);
 				line = br.readLine();
 				if (line.contains("Content-Length")) {
 					contentLength = getContentLength(line);
+				}
+				if (line.contains("Cookie")) {
+					logined = isLogin(line);
 				}
 			}
 
@@ -54,8 +59,7 @@ public class RequestHandler extends Thread {
 			if ("/create".equals(url)) {
 				String body = IOUtils.readData(br, contentLength);
 				Map<String, String> params = HttpRequestUtils.parseQueryString(body);
-				User user = new User(params.get("userId"), params.get("password"), params.get("name"),
-						params.get("email"));
+				User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
 				log.debug("user : {}", user);
 				DataBase.addUser(user);
 				DataOutputStream dos = new DataOutputStream(out);
@@ -74,6 +78,21 @@ public class RequestHandler extends Thread {
 				} else {
 					responseResource(out, "/user/login_failed.html");
 				}
+			} else if ("/user/list".equals(url)) {
+				if (!logined) {
+					responseResource(out, "/user/login.html");
+					return;
+				}
+
+				Collection<User> users = DataBase.findAll();
+				StringBuilder sb = new StringBuilder();
+				for (User user : users) {
+					sb.append(user.getUserId() + " : " + user.getName() + " : " + user.getEmail() + "<br/>");
+				}
+				byte[] body = sb.toString().getBytes();
+				DataOutputStream dos = new DataOutputStream(out);
+				response200Header(dos, body.length);
+				responseBody(dos, body);
 			} else if (url.endsWith(".css")) {
 				responseCssResource(out, url);
 			} else {
@@ -84,13 +103,23 @@ public class RequestHandler extends Thread {
 		}
 	}
 
+	private boolean isLogin(String line) {
+		String[] headerTokens = line.split(":");
+		Map<String, String> cookies = HttpRequestUtils.parseCookies(headerTokens[1].trim());
+		String value = cookies.get("logined");
+		if (value == null) {
+			return false;
+		}
+		return Boolean.parseBoolean(value);
+	}
+
 	private void responseResource(OutputStream out, String url) throws IOException {
 		DataOutputStream dos = new DataOutputStream(out);
 		byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
 		response200Header(dos, body.length);
 		responseBody(dos, body);
 	}
-	
+
 	private void responseCssResource(OutputStream out, String url) throws IOException {
 		DataOutputStream dos = new DataOutputStream(out);
 		byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
@@ -121,7 +150,7 @@ public class RequestHandler extends Thread {
 			log.error(e.getMessage());
 		}
 	}
-	
+
 	private void response200CssHeader(DataOutputStream dos, int lengthOfBodyContent) {
 		try {
 			dos.writeBytes("HTTP/1.1 200 OK \r\n");
