@@ -9,15 +9,27 @@ import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
 	/**
-	 * @param queryString은 URL에서 ? 이후에 전달되는 name=value 임
+	 * @param queryString은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
 	 * @return
 	 */
 	public static Map<String, String> parseQueryString(String queryString) {
-		if (Strings.isNullOrEmpty(queryString)) {
+		return parseValues(queryString, "&");
+	}
+	
+	/**
+	 * @param 쿠키 값은 name1=value1; name2=value2 형식임
+	 * @return
+	 */
+	public static Map<String, String> parseCookies(String cookies) {
+		return parseValues(cookies, ";");
+	}
+	
+	private static Map<String, String> parseValues(String values, String separator) {
+		if (Strings.isNullOrEmpty(values)) {
 			return Maps.newHashMap();
 		}
 		
-		String[] tokens = queryString.split("&");
+		String[] tokens = values.split(separator);
 		return Arrays.stream(tokens)
 					.map(t -> getKeyValue(t, "="))
 					.filter(p -> p != null)
@@ -46,8 +58,8 @@ public class HttpRequestUtils {
 		String value;
 		
 		Pair(String key, String value) {
-			this.key = key;
-			this.value = value;
+			this.key = key.trim();
+			this.value = value.trim();
 		}
 		
 		public String getKey() {
