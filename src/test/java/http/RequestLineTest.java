@@ -20,9 +20,9 @@ public class RequestLineTest {
 	
 	@Test
 	public void create_path_and_params() {
-		RequestLine line = new RequestLine("GET /create?userId=javajigi&password=pass HTTP/1.1");
+		RequestLine line = new RequestLine("GET /user/create?userId=javajigi&password=pass HTTP/1.1");
 		assertEquals(HttpMethod.GET, line.getMethod());
-		assertEquals("/create", line.getPath());
+		assertEquals("/user/create", line.getPath());
 		Map<String, String> params = line.getParams();
 		assertEquals(2, params.size());
 	}
