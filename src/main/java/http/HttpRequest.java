@@ -58,7 +58,7 @@ public class HttpRequest {
 		return requestLine.getMethod();
 	}
 	
-	public HttpCookie getCookies() {
+	public HttpCookie getCookie() {
 		return new HttpCookie(getHeader("Cookie"));
 	}
 	
