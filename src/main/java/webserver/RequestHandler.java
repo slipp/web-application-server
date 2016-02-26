@@ -40,23 +40,26 @@ public class RequestHandler extends Thread {
 				return;
 			}
 
+			log.debug("request line : {}", line);
 			String[] tokens = line.split(" ");
 
 			int contentLength = 0;
 			boolean logined = false;
 			while (!line.equals("")) {
-				log.debug("header : {}", line);
 				line = br.readLine();
+				log.debug("header : {}", line);
+				
 				if (line.contains("Content-Length")) {
 					contentLength = getContentLength(line);
 				}
+				
 				if (line.contains("Cookie")) {
 					logined = isLogin(line);
 				}
 			}
 
 			String url = getDefaultUrl(tokens);
-			if ("/create".equals(url)) {
+			if ("/user/create".equals(url)) {
 				String body = IOUtils.readData(br, contentLength);
 				Map<String, String> params = HttpRequestUtils.parseQueryString(body);
 				User user = new User(params.get("userId"), params.get("password"), params.get("name"), params.get("email"));
@@ -64,7 +67,7 @@ public class RequestHandler extends Thread {
 				DataBase.addUser(user);
 				DataOutputStream dos = new DataOutputStream(out);
 				response302Header(dos);
-			} else if ("/login".equals(url)) {
+			} else if ("/user/login".equals(url)) {
 				String body = IOUtils.readData(br, contentLength);
 				Map<String, String> params = HttpRequestUtils.parseQueryString(body);
 				User user = DataBase.findUserById(params.get("userId"));
