@@ -19,9 +19,15 @@ public class ListUserController extends AbstractController {
 
 		Collection<User> users = DataBase.findAll();
 		StringBuilder sb = new StringBuilder();
+		sb.append("<table border='1'>");
 		for (User user : users) {
-			sb.append(user.getUserId() + " : " + user.getName() + " : " + user.getEmail() + "<br/>");
+			sb.append("<tr>");
+			sb.append("<td>" + user.getUserId() + "</td>");
+			sb.append("<td>" + user.getName() + "</td>");
+			sb.append("<td>" + user.getEmail() + "</td>");
+			sb.append("</tr>");
 		}
+		sb.append("</table>");
 		response.forwardBody(sb.toString());		
 	}
 
