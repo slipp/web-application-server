@@ -34,14 +34,14 @@ public class RequestHandler extends Thread {
 			HttpResponse response = new HttpResponse(out);
 			String path = getDefaultPath(request.getPath());
 			
-			if ("/create".equals(path)) {
+			if ("/user/create".equals(path)) {
 				User user = new User(
 						request.getParameter("userId"), request.getParameter("password"), 
 						request.getParameter("name"), request.getParameter("email"));
 				log.debug("user : {}", user);
 				DataBase.addUser(user);
 				response.sendRedirect("/index.html");
-			} else if ("/login".equals(path)) {
+			} else if ("/user/login".equals(path)) {
 				User user = DataBase.findUserById(request.getParameter("userId"));
 				if (user != null) {
 					if (user.login(request.getParameter("password"))) {
