@@ -1,6 +1,5 @@
 package webserver;
 
-import http.HttpCookie;
 import http.HttpRequest;
 import http.HttpResponse;
 
@@ -9,12 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.Map;
 
 import model.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import util.HttpRequestUtils;
 import db.DataBase;
 
 public class RequestHandler extends Thread {
@@ -54,8 +55,7 @@ public class RequestHandler extends Thread {
 					response.sendRedirect("/user/login_failed.html");
 				}
 			} else if ("/user/list".equals(path)) {
-				HttpCookie cookies = request.getCookies();
-				if (!isLogin(cookies)) {
+				if (!isLogin(request.getHeader("Cookie"))) {
 					response.sendRedirect("/user/login.html");
 					return;
 				}
@@ -80,8 +80,9 @@ public class RequestHandler extends Thread {
 		}
 	}
 
-	private boolean isLogin(HttpCookie cookie) {
-		String value = cookie.getCookie("logined");
+	private boolean isLogin(String cookieValue) {
+		Map<String, String> cookies = HttpRequestUtils.parseCookies(cookieValue);
+		String value = cookies.get("logined");
 		if (value == null) {
 			return false;
 		}
