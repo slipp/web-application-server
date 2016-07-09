@@ -4,4 +4,4 @@
 /.classpath
 /.project
 /.idea
-web-application-server.iml
+*.iml
