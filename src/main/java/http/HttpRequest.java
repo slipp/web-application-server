@@ -14,67 +14,67 @@ import util.HttpRequestUtils;
 import util.IOUtils;
 
 public class HttpRequest {
-	private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
-	
-	private Map<String, String> headers = new HashMap<String, String>();
-	
-	private Map<String, String> params;
-	
-	private RequestLine requestLine;
-	
-	public HttpRequest(InputStream is) {
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-			String line = br.readLine();
-			log.debug("request line : {}", line);
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-			if (line == null) {
-				return;
-			}
+    private Map<String, String> headers = new HashMap<String, String>();
 
-			requestLine = new RequestLine(line);
-			
-			while(!line.equals("")) {
-				line = br.readLine();
-				log.debug("header : {}", line);
-				if (!line.equals("")){
-					String[] tokens = line.split(":");
-					headers.put(tokens[0], tokens[1].trim());
-				}
-			}
-			
-			if (requestLine.isPost()) {
-				String body = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
-				params = HttpRequestUtils.parseQueryString(body);
-			} else {
-				params = requestLine.getParams();
-			}
-		} catch (IOException io) {
-			log.error(io.getMessage());
-		}
-	}
-	
-	public HttpMethod getMethod() {
-		return requestLine.getMethod();
-	}
-	
-	public String getPath() {
-		return requestLine.getPath();
-	}
-	
-	public String getHeader(String name) {
-		return headers.get(name);
-	}
-	
-	public String getParameter(String name) {
-		return params.get(name);
-	}
-	
-	public HttpCookie getCookies() {
-		return new HttpCookie(getHeader("Cookie"));
-	}
-	
-	public HttpSession getSession() {
-		return HttpSessions.getSession(getCookies().getCookie("JSESSIONID"));
-	}
+    private Map<String, String> params;
+
+    private RequestLine requestLine;
+
+    public HttpRequest(InputStream is) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String line = br.readLine();
+            log.debug("request line : {}", line);
+
+            if (line == null) {
+                return;
+            }
+
+            requestLine = new RequestLine(line);
+
+            while (!line.equals("")) {
+                line = br.readLine();
+                log.debug("header : {}", line);
+                if (!line.equals("")) {
+                    String[] tokens = line.split(":");
+                    headers.put(tokens[0], tokens[1].trim());
+                }
+            }
+
+            if (requestLine.isPost()) {
+                String body = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
+                params = HttpRequestUtils.parseQueryString(body);
+            } else {
+                params = requestLine.getParams();
+            }
+        } catch (IOException io) {
+            log.error(io.getMessage());
+        }
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
+
+    public String getParameter(String name) {
+        return params.get(name);
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(getHeader("Cookie"));
+    }
+
+    public HttpSession getSession() {
+        return HttpSessions.getSession(getCookies().getCookie("JSESSIONID"));
+    }
 }
