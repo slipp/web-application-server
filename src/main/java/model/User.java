@@ -1,41 +1,40 @@
 package model;
 
 public class User {
-	private String userId;
-	private String password;
-	private String name;
-	private String email;
-	
-	public User(String userId, String password, String name, String email) {
-		this.userId = userId;
-		this.password = password;
-		this.name = name;
-		this.email = email;
-	}
-	
-	public String getUserId() {
-		return userId;
-	}
+    private String userId;
+    private String password;
+    private String name;
+    private String email;
 
-	public String getPassword() {
-		return password;
-	}
+    public User(String userId, String password, String name, String email) {
+        this.userId = userId;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getUserId() {
+        return userId;
+    }
 
-	public String getEmail() {
-		return email;
-	}
-	
-	public boolean login(String password) {
-		return this.password.equals(password);
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", password=" + password + ", name="
-				+ name + ", email=" + email + "]";
-	}
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public boolean login(String password) {
+        return this.password.equals(password);
+    }
+
+    @Override
+    public String toString() {
+        return "User [userId=" + userId + ", password=" + password + ", name=" + name + ", email=" + email + "]";
+    }
 }
