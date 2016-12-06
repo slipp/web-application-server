@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import controller.Controller;
 
-public class RequestHandler extends Thread {
+public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
