@@ -1,9 +1,6 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 import org.slf4j.Logger;
@@ -22,10 +19,29 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
 
+        // RequestHandler는 사용자의 요청이 있을 때까지 대기 상태에 있는다.
+        // 요청이 있을 경우 RequestHandler 클래스에 위임하는 역할을 함.
+        System.out.println("Start RequestHandler");
+
+        // 서버 입장에서 입력 : InputStream
+        // 서버 입장에서 출력 : OutputStream
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String line = br.readLine();
+
+            if(line == null) return;
+
+            while(!line.equals("")) {
+                log.debug("value : {}", line);
+                line = br.readLine();
+            }
+            System.out.println();
+
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello World".getBytes();
+
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
