@@ -1,13 +1,12 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -23,9 +22,28 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            BufferedReader buffer_reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            String request_header = buffer_reader.readLine();
+
+            if (request_header == null) {
+                return;
+            }
+
+            String file_name = HttpRequestUtils.getUrl(request_header);
+
+            if (file_name.equals("/")) {
+                file_name = "/index.html";
+            }
+
+            //log.debug("File Name : {}", file_name);
+
+            //while(!"".equals(request_header)) {
+            //    log.debug("Header : {}", request_header);
+            //    request_header = buffer_reader.readLine();
+            //}
+
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+            byte[] body = Files.readAllBytes(new File("./webapp" + file_name).toPath());
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
