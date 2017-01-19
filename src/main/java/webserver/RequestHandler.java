@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,22 +32,41 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
 
+            // 만약 null일 경우 더 진행할 의미가 없다.
             if(line == null) return;
+            log.debug("header: {}", line);
+
+            // http 요청 정보 중 첫 라인에 대한 검사, 요구사항1 중 2단계
+            byte[] body = readFirstUrl(line);
 
             while(!line.equals("")) {
-                log.debug("value : {}", line);
                 line = br.readLine();
+                log.debug("header: {}", line);
             }
-            System.out.println();
 
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
 
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private byte[] readFirstUrl(String line) {
+        String[] tokens = line.split(" ");
+        String url;
+        byte[] body = null;
+
+        url = tokens[1];
+
+        try {
+            body = Files.readAllBytes(new File("./webapp" + url).toPath());
+        }catch (Exception e){
+            e.getMessage();
+        }
+
+        return body;
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
