@@ -9,6 +9,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -31,6 +32,7 @@ public class RequestHandler extends Thread {
                 return;
             }
 
+            String method = HttpRequestUtils.getMethod(request_header);
             String url = HttpRequestUtils.getUrl(request_header);
             // String request_method = HttpRequestUtils.getMethod(request_header);
 
@@ -41,11 +43,29 @@ public class RequestHandler extends Thread {
             log.debug("url : {}", url);
 
             if (url.startsWith("/user/create")) {
-                int begin_index = url.indexOf("?") + 1;
-                String queryString = url.substring(begin_index);
-                Map<String, String> data = HttpRequestUtils.parseQueryString(queryString);
-                User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
-                log.debug("User : {}", user);
+                if (method.toUpperCase().equals("GET")) {
+                    int begin_index = url.indexOf("?") + 1;
+                    String queryString = url.substring(begin_index);
+                    Map<String, String> data = HttpRequestUtils.parseQueryString(queryString);
+                    User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
+                    
+                    log.debug("User : {}", user);
+                } else if (method.toUpperCase().equals("POST")) {
+                    int contentLength = 0;
+
+                    while(!request_header.equals("")) {
+                        request_header = buffer_reader.readLine();
+                        if (request_header.contains("Content-Length")) {
+                            String[] contentLengthtokens = request_header.split(":");
+                            contentLength = Integer.parseInt(contentLengthtokens[1].trim());
+                        }
+                    }
+                    String header_body = IOUtils.readData(buffer_reader, contentLength);
+                    Map<String, String> data = HttpRequestUtils.parseQueryString(header_body);
+                    User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
+
+                    log.debug("User : {}", user);
+                }
             } else {
                 DataOutputStream dos = new DataOutputStream(out);
                 byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());

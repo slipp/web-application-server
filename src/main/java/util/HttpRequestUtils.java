@@ -21,6 +21,13 @@ public class HttpRequestUtils {
         String url = splited[1];
         return url;
     }
+
+    public static String getMethod(String header_firstline) {
+        String[] splited = header_firstline.split(" ");
+        String method = splited[0];
+
+        return method;
+    }
     public static Map<String, String> parseQueryString(String queryString) {
         return parseValues(queryString, "&");
     }
