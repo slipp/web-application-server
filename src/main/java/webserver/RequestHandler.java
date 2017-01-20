@@ -48,7 +48,10 @@ public class RequestHandler extends Thread {
                     String queryString = url.substring(begin_index);
                     Map<String, String> data = HttpRequestUtils.parseQueryString(queryString);
                     User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
-                    
+
+                    url = "/index.html";
+                    DataOutputStream dos = new DataOutputStream(out);
+                    respond302Header(dos, url);
                     log.debug("User : {}", user);
                 } else if (method.toUpperCase().equals("POST")) {
                     int contentLength = 0;
@@ -64,6 +67,9 @@ public class RequestHandler extends Thread {
                     Map<String, String> data = HttpRequestUtils.parseQueryString(header_body);
                     User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
 
+                    url = "/index.html";
+                    DataOutputStream dos = new DataOutputStream(out);
+                    respond302Header(dos, url);
                     log.debug("User : {}", user);
                 }
             } else {
@@ -92,6 +98,16 @@ public class RequestHandler extends Thread {
         try {
             dos.write(body, 0, body.length);
             dos.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void respond302Header(DataOutputStream dos, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Redirect  \r\n");
+            dos.writeBytes("Location: " + url + " \r\n");
+            dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
