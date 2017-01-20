@@ -3,7 +3,9 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
@@ -29,23 +31,27 @@ public class RequestHandler extends Thread {
                 return;
             }
 
-            String file_name = HttpRequestUtils.getUrl(request_header);
+            String url = HttpRequestUtils.getUrl(request_header);
+            // String request_method = HttpRequestUtils.getMethod(request_header);
 
-            if (file_name.equals("/")) {
-                file_name = "/index.html";
+            if (url.equals("/")) {
+                url = "/index.html";
             }
 
-            //log.debug("File Name : {}", file_name);
+            log.debug("url : {}", url);
 
-            //while(!"".equals(request_header)) {
-            //    log.debug("Header : {}", request_header);
-            //    request_header = buffer_reader.readLine();
-            //}
-
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = Files.readAllBytes(new File("./webapp" + file_name).toPath());
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            if (url.startsWith("/user/create")) {
+                int begin_index = url.indexOf("?") + 1;
+                String queryString = url.substring(begin_index);
+                Map<String, String> data = HttpRequestUtils.parseQueryString(queryString);
+                User user = new User(data.get("userId"), data.get("password"), data.get("name"), data.get("email"));
+                log.debug("User : {}", user);
+            } else {
+                DataOutputStream dos = new DataOutputStream(out);
+                byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                response200Header(dos, body.length);
+                responseBody(dos, body);
+            }
         } catch (IOException e) {
             log.error(e.getMessage());
         }
