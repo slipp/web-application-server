@@ -35,6 +35,7 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            DataOutputStream dos = new DataOutputStream(out);
             String line = br.readLine();
 
             // 만약 null일 경우 더 진행할 의미가 없다.
@@ -61,11 +62,14 @@ public class RequestHandler extends Thread {
                     log.debug(user.toString());
                 }
             }else {
+                // method가 post일 경우
                 if(requestUrl.startsWith("/user/create")) {
                     String sa = IOUtils.readData(br, length);
                     Map<String, String> map = HttpRequestUtils.parseQueryString(sa);
                     User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
                     log.debug(user.toString());
+                    requestUrl = "/index.html";
+                    response302Header(dos, requestUrl);
                 }
             }
             // http 요청 정보 중 첫 라인에 대한 검사, 요구사항1 중 2단계
@@ -76,17 +80,11 @@ public class RequestHandler extends Thread {
                 return;
             }
 
-            DataOutputStream dos = new DataOutputStream(out);
-
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void httpMethodCheck(String line) {
-
     }
 
     private byte[] readFirstUrl(String url) {
@@ -97,6 +95,16 @@ public class RequestHandler extends Thread {
             e.getMessage();
         }
         return body;
+    }
+
+    private void response302Header(DataOutputStream dos, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
+            dos.writeBytes("Location: " + url + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
