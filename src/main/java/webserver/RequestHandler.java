@@ -35,9 +35,6 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            String a = IOUtils.readData(br, 2000);
-            log.debug("post : {}", a);
-
             String line = br.readLine();
 
             // 만약 null일 경우 더 진행할 의미가 없다.
@@ -46,26 +43,37 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" ");
             String method = tokens[0];
             String requestUrl = tokens[1];
+            int length = 0;
+
+            while(!line.equals("")) {
+                line = br.readLine();
+                if(line.contains("Content-Length")){
+                    int index = line.indexOf(" ");
+                    length = Integer.parseInt(line.substring(index+1));
+                }
+            }
 
             if (method.toLowerCase().equals("get")) {
                 // method 가 get일 경우
                 if(requestUrl.startsWith("/user/create")) {
                     Map<String, String> map = HttpRequestUtils.parseQueryString(requestUrl);
                     User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                    log.debug(user.toString());
+                }
+            }else {
+                if(requestUrl.startsWith("/user/create")) {
+                    String sa = IOUtils.readData(br, length);
+                    Map<String, String> map = HttpRequestUtils.parseQueryString(sa);
+                    User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                    log.debug(user.toString());
                 }
             }
-
             // http 요청 정보 중 첫 라인에 대한 검사, 요구사항1 중 2단계
             byte[] body = readFirstUrl(requestUrl);
 
             if(body == null) {
-                log.debug("body IS NULL return!");
+                log.debug("not connection page. close");
                 return;
-            }
-
-            while(!line.equals("")) {
-                line = br.readLine();
-                log.debug("header: {}", line);
             }
 
             DataOutputStream dos = new DataOutputStream(out);
