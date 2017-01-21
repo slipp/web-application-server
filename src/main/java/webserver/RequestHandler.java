@@ -3,9 +3,14 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -29,15 +34,34 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            String a = IOUtils.readData(br, 2000);
+            log.debug("post : {}", a);
+
             String line = br.readLine();
 
             // 만약 null일 경우 더 진행할 의미가 없다.
             if(line == null) return;
             log.debug("header: {}", line);
+            String[] tokens = line.split(" ");
+            String method = tokens[0];
+            String requestUrl = tokens[1];
+
+            if (method.toLowerCase().equals("get")) {
+                // method 가 get일 경우
+                if(requestUrl.startsWith("/user/create")) {
+                    Map<String, String> map = HttpRequestUtils.parseQueryString(requestUrl);
+                    User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                }
+            }
 
             // http 요청 정보 중 첫 라인에 대한 검사, 요구사항1 중 2단계
-            byte[] body = readFirstUrl(line);
+            byte[] body = readFirstUrl(requestUrl);
+
+            if(body == null) {
+                log.debug("body IS NULL return!");
+                return;
+            }
 
             while(!line.equals("")) {
                 line = br.readLine();
@@ -53,19 +77,17 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private byte[] readFirstUrl(String line) {
-        String[] tokens = line.split(" ");
-        String url;
+    private void httpMethodCheck(String line) {
+
+    }
+
+    private byte[] readFirstUrl(String url) {
         byte[] body = null;
-
-        url = tokens[1];
-
         try {
             body = Files.readAllBytes(new File("./webapp" + url).toPath());
         }catch (Exception e){
             e.getMessage();
         }
-
         return body;
     }
 
