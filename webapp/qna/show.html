@@ -141,9 +141,9 @@
                                           <a class="link-modify-article" href="/questions/413/answers/1405/form">수정</a>
                                       </li>
                                       <li>
-                                          <form class="form-delete" action="/questions/413/answers/1405" method="POST">
+                                          <form class="delete-answer-form" action="/questions/413/answers/1405" method="POST">
                                               <input type="hidden" name="_method" value="DELETE">
-                                              <button type="submit" class="link-delete-article">삭제</button>
+                                              <button type="submit" class="delete-answer-button">삭제</button>
                                           </form>
                                       </li>
                                   </ul>
@@ -172,7 +172,7 @@
                                       <li>
                                           <form class="form-delete" action="/questions/413/answers/1405" method="POST">
                                               <input type="hidden" name="_method" value="DELETE">
-                                              <button type="submit" class="link-delete-article">삭제</button>
+                                              <button type="submit" class="delete-answer-button">삭제</button>
                                           </form>
                                       </li>
                                   </ul>
@@ -213,8 +213,9 @@
 				<a class="link-modify-article" href="/api/qna/updateAnswer/{3}">수정</a>
 			</li>
 			<li>
-				<form class="form-delete delete-answer-form" action="/api/questions/{3}/answers/{4}" method="POST">
-					<button type="submit" class="link-delete-article">삭제</button>
+				<form class="delete-answer-form" action="/api/questions/{3}/answers/{4}" method="POST">
+					<input type="hidden" name="_method" value="DELETE">
+                     <button type="submit" class="delete-answer-button">삭제</button>
 				</form>
 			</li>
 		</ul>
