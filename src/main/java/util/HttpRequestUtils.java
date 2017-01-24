@@ -22,6 +22,13 @@ public class HttpRequestUtils {
         return url;
     }
 
+    public static String getQueryString(String url) {
+        int begin_index = url.indexOf("?") + 1;
+        String queryString = url.substring(begin_index);
+
+        return queryString;
+    }
+
     public static String getMethod(String header_firstline) {
         String[] splited = header_firstline.split(" ");
         String method = splited[0];
