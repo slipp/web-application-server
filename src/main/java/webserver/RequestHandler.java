@@ -4,11 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
@@ -99,8 +97,18 @@ public class RequestHandler extends Thread {
                     byte[] body = readFirstUrl(requestUrl);
                     response200CssHeader(dos, body.length);
                     responseBody(dos, body);
+                } else {
+                    byte[] body = readFirstUrl(requestUrl);
+
+                    if(body == null) {
+                        log.debug("not connection page. close");
+                        return;
+                    }
+
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
                 }
-            } else {
+            } else if (method.toLowerCase().equals("post")) {
                 // method가 post일 경우
                 if (requestUrl.startsWith("/user/create")) {
                     String data = IOUtils.readData(br, length);
@@ -131,16 +139,6 @@ public class RequestHandler extends Thread {
                     }
                 }
             }
-            // http 요청 정보 중 첫 라인에 대한 검사, 요구사항1 중 2단계
-            byte[] body = readFirstUrl(requestUrl);
-
-            if(body == null) {
-                log.debug("not connection page. close");
-                return;
-            }
-
-            response200Header(dos, body.length);
-            responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
