@@ -14,7 +14,7 @@ public class HttpRequestUtils {
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
-        return parseValues(queryString, "&");
+        return parseValues(seperateUrlName(queryString), "&");
     }
 
     /**
@@ -34,6 +34,14 @@ public class HttpRequestUtils {
         String[] tokens = values.split(separator);
         return Arrays.stream(tokens).map(t -> getKeyValue(t, "=")).filter(p -> p != null)
                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+    }
+
+    private static String seperateUrlName(String queryString) {
+        String url = queryString;
+        int index = url.indexOf("?");
+        url = url.substring(index + 1);
+
+        return url;
     }
 
     static Pair getKeyValue(String keyValue, String regex) {
