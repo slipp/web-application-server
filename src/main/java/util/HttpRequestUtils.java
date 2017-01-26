@@ -7,12 +7,34 @@ import java.util.stream.Collectors;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
+import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
+
 public class HttpRequestUtils {
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
+
+    public static String getUrl(String header_firstline) {
+        String[] splited = header_firstline.split(" ");
+        String url = splited[1];
+        return url;
+    }
+
+    public static String getQueryString(String url) {
+        int begin_index = url.indexOf("?") + 1;
+        String queryString = url.substring(begin_index);
+
+        return queryString;
+    }
+
+    public static String getMethod(String header_firstline) {
+        String[] splited = header_firstline.split(" ");
+        String method = splited[0];
+
+        return method;
+    }
     public static Map<String, String> parseQueryString(String queryString) {
         return parseValues(queryString, "&");
     }
