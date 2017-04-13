@@ -35,9 +35,8 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
-            HttpRequest httpRequest = new HttpRequest(br);
+            HttpRequest httpRequest = new HttpRequest(in);
             
             String http_method = httpRequest.getHttpMethod();
             String target_url = httpRequest.getPath();
@@ -47,12 +46,11 @@ public class RequestHandler extends Thread {
             byte[] body = new byte[0];
 
             if(target_url.equals("/user/create")) {
-                addUserToDataBase(newUserFromParams(getPostData(br, Integer.parseInt(httpRequest.getHeader("Content-Length")))));
-
+                addUserToDataBase(newUserFromParams(httpRequest.getRequestBodies()));
                 response302Header(dos, "../../index.html");
             } else if (http_method.equals("POST") && target_url.equals("/user/login")) {
-                Map<String, String> postData = getPostData(br, Integer.parseInt(httpRequest.getHeader("Content-Length")));
-                if(isCorrectPassword(postData, findUserFromDataBase(postData.get("userId")))) {
+                Map<String, String> userData = httpRequest.getRequestBodies();
+                if(isCorrectPassword(userData, findUserFromDataBase(userData.get("userId")))) {
                     response302HeaderForCookie(dos, "../../index.html","logined=true");
                 } else {
                     response302HeaderForCookie(dos, "./login_failed.html","logined=false");
@@ -103,10 +101,6 @@ public class RequestHandler extends Thread {
                 params.get("name"),
                 params.get("email")
         );
-    }
-
-    private Map<String, String> getPostData(BufferedReader br, int contentLength) throws IOException {
-        return HttpRequestUtils.parseQueryString(IOUtils.readData(br, contentLength));
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
