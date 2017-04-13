@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import util.HttpRequestUtils;
 
-public class RequestParams {
+class RequestParams {
 	private static final Logger log = LoggerFactory.getLogger(RequestParams.class);
 	
 	private Map<String, String> params = new HashMap<>();
 
-	public void addQueryString(String queryString) {
+	void addQueryString(String queryString) {
 		putParams(queryString);
 	}
 
@@ -28,11 +28,11 @@ public class RequestParams {
 		log.debug("params : {}", params);
 	}
 
-	public void addBody(String body) {
+	void addBody(String body) {
 		putParams(body);	
 	}
 
-	public String getParameter(String name) {
+	String getParameter(String name) {
 		return params.get(name);
 	}
 }

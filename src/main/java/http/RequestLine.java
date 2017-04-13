@@ -5,7 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestLine {
+class RequestLine {
     private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
 
     private String method;
@@ -14,18 +14,18 @@ public class RequestLine {
 
     private Map<String, String> params;
 
-    public RequestLine(String requestLine) {
+    RequestLine(String requestLine) {
     }
 
-    public String getMethod() {
+    String getMethod() {
         return method;
     }
 
-    public String getPath() {
+    String getPath() {
         return path;
     }
 
-    public Map<String, String> getParams() {
+    Map<String, String> getParams() {
         return params;
     }
 }
