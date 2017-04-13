@@ -37,41 +37,29 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
-            Map<String, String> headers = getHeaders(br);
+            HttpRequest httpRequest = new HttpRequest(br);
             
-            String http_method = headers.get("Http_Method");
-            String target_url = headers.get("Target_Url");
+            String http_method = httpRequest.getHttpMethod();
+            String target_url = httpRequest.getPath();
             
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = new byte[0];
 
             if(target_url.equals("/user/create")) {
-                Map<String, String> params = HttpRequestUtils.parseQueryString(IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length"))));
+                addUserToDataBase(newUserFromParams(getPostData(br, Integer.parseInt(httpRequest.getHeader("Content-Length")))));
 
-                User user = new User(
-                        params.get("userId"),
-                        params.get("password"),
-                        params.get("name"),
-                        params.get("email")
-                );
-
-                DataBase.addUser(user);
-                
                 response302Header(dos, "../../index.html");
             } else if (http_method.equals("POST") && target_url.equals("/user/login")) {
-                Map<String, String> params = HttpRequestUtils.parseQueryString(IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length"))));
-
-                User user = DataBase.findUserById(params.get("userId"));
-
-                if(user.getPassword().equals(params.get("password"))) {
+                Map<String, String> postData = getPostData(br, Integer.parseInt(httpRequest.getHeader("Content-Length")));
+                if(isCorrectPassword(postData, findUserFromDataBase(postData.get("userId")))) {
                     response302HeaderForCookie(dos, "../../index.html","logined=true");
                 } else {
                     response302HeaderForCookie(dos, "./login_failed.html","logined=false");
                 }
                 
             } else if(target_url.equals("/user/list")) {
-                if(headers.get("Cookie").contains("logined=true")) {
+                if(isLogined(httpRequest.getHeader("Cookie"))) {
                     response302Header(dos, "./list.html");
                 } else {
                     response302Header(dos, "./login.html");
@@ -87,33 +75,38 @@ public class RequestHandler extends Thread {
             }
 
             responseBody(dos, body);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
 
-    private Map<String, String> getHeaders(BufferedReader br) throws IOException {
-        String line = br.readLine();
+    private boolean isCorrectPassword(Map<String, String> params, User user) {
+        return user.getPassword().equals(params.get("password"));
+    }
 
-        if(line == null) {
-            return null;
-        }
+    private boolean isLogined(String cookie) {
+        return cookie.contains("logined=true");
+    }
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Http_Method", line.split(" ")[0]);
-        headers.put("Target_Url", line.split(" ")[1]);
-        log.debug("Http_Method : {}", line.split(" ")[0]);
-        log.debug("Target_Url : {}", line.split(" ")[1]);
+    private void addUserToDataBase(User user) {
+        DataBase.addUser(user);
+    }
 
-        while (!"".equals(line)) {
-            line = br.readLine();
-            if(!"".equals(line)) {
-                headers.put(HttpRequestUtils.parseHeader(line).getKey(),HttpRequestUtils.parseHeader(line).getValue());
-                log.debug("{} : {}", HttpRequestUtils.parseHeader(line).getKey(), HttpRequestUtils.parseHeader(line).getValue());
-            }
-        }
+    private User findUserFromDataBase(String userId) {
+        return DataBase.findUserById(userId);
+    }
 
-        return headers;
+    private User newUserFromParams(Map<String, String> params) {
+        return User.build(
+                params.get("userId"),
+                params.get("password"),
+                params.get("name"),
+                params.get("email")
+        );
+    }
+
+    private Map<String, String> getPostData(BufferedReader br, int contentLength) throws IOException {
+        return HttpRequestUtils.parseQueryString(IOUtils.readData(br, contentLength));
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {

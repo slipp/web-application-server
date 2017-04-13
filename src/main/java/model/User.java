@@ -28,6 +28,10 @@ public class User {
     public String getEmail() {
         return email;
     }
+    
+    public static User build(String userId, String password, String name, String email) {
+        return new User(userId, password, name, email);
+    }
 
     @Override
     public String toString() {
