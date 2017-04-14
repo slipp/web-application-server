@@ -1,0 +1,8 @@
+POST /user/create?id=1 HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 46
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+userId=javajigi&password=password&name=JaeSung

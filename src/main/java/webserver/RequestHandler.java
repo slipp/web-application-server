@@ -46,7 +46,7 @@ public class RequestHandler extends Thread {
                 User user = DataBase.findUserById(request.getParameter("userId"));
                 if (user != null) {
                     if (user.login(request.getParameter("password"))) {
-                        response.addHeader("Set-Cookie", "logined=true");
+                        response.addHeader("Set-Cookie", "logined=true; Path=/");
                         response.sendRedirect("/index.html");
                     } else {
                         response.sendRedirect("/user/login_failed.html");

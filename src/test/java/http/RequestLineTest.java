@@ -2,19 +2,20 @@ package http;
 
 import static org.junit.Assert.*;
 
-import java.util.Map;
-
 import org.junit.Test;
 
 public class RequestLineTest {
 
     @Test
-    public void create_method() {
+    public void create_method_get() {
         RequestLine line = new RequestLine("GET /index.html HTTP/1.1");
         assertEquals(HttpMethod.GET, line.getMethod());
         assertEquals("/index.html", line.getPath());
-
-        line = new RequestLine("POST /index.html HTTP/1.1");
+    }
+    
+    @Test
+    public void create_method_post() {
+        RequestLine line = new RequestLine("POST /index.html HTTP/1.1");
         assertEquals("/index.html", line.getPath());
     }
 
@@ -23,7 +24,6 @@ public class RequestLineTest {
         RequestLine line = new RequestLine("GET /user/create?userId=javajigi&password=pass HTTP/1.1");
         assertEquals(HttpMethod.GET, line.getMethod());
         assertEquals("/user/create", line.getPath());
-        Map<String, String> params = line.getParams();
-        assertEquals(2, params.size());
+        assertEquals("userId=javajigi&password=pass", line.getQueryString());
     }
 }
