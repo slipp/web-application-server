@@ -29,6 +29,12 @@ public class User {
         return email;
     }
 
+    public boolean nullValueCheck(){
+        if(this.userId==null || this.password == null || this.name==null || this.email == null)
+            return true;
+        return false;
+    }
+
     @Override
     public String toString() {
         return "User [userId=" + userId + ", password=" + password + ", name=" + name + ", email=" + email + "]";
