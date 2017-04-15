@@ -37,13 +37,11 @@ public class Request {
   private static boolean parseRequests(Request request, BufferedReader br) throws IOException {
     String line = br.readLine();
     getMethodANDApi(request, line);
-    System.out.println(line);  //
     if (line == null) {
       return false;
     }
     while (!"".equals(line)) {
       line = br.readLine();
-      System.out.println(line); //
       getBodyLength(request, line);
       getCookie(request, line);
     }
