@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/june0313/web-application-server.svg?branch=master)](https://travis-ci.org/june0313/web-application-server)
+
 # 실습을 위한 개발 환경 세팅
 * https://github.com/slipp/web-application-server 프로젝트를 자신의 계정으로 Fork한다. Github 우측 상단의 Fork 버튼을 클릭하면 자신의 계정으로 Fork된다.
 * Fork한 프로젝트를 eclipse 또는 터미널에서 clone 한다.
