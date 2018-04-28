@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/june0313/web-application-server.svg?branch=master)](https://travis-ci.org/june0313/web-application-server)
+
 # 실습을 위한 개발 환경 세팅
 * https://github.com/slipp/web-application-server 프로젝트를 자신의 계정으로 Fork한다. Github 우측 상단의 Fork 버튼을 클릭하면 자신의 계정으로 Fork된다.
 * Fork한 프로젝트를 eclipse 또는 터미널에서 clone 한다.
@@ -15,7 +17,9 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
-* 
+* apache나 nginx같은 웹 서버들이 대략 어떤일을 하는지 조금이나마 알게되었다.
+* 결국 웹 서버는 요청에 대한 적절한 응답을 주는 역할을 하는데, 이 요청과 응답에 대한 스펙이 바로 HTTP이다.
+* 이 예제에서는 리퀘스트를 받을때 마다 새로운 스레드를 생성하는데, 상용 혹은 오픈소스 웹 서버들은 어떤식으로 스레드를 관리하는지 궁금하다.
 
 ### 요구사항 2 - get 방식으로 회원가입
 * 
