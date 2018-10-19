@@ -71,13 +71,14 @@ public class RequestHandler extends Thread {
 			DataOutputStream dos = new DataOutputStream(out);
 			byte[] body = null;
 			String fileFormat = URL.substring(URL.lastIndexOf('.') + 1);
-			if(URL.equals("/user/create")) {
+			
+			if(URL.startsWith("/user/create")) {
 				User user = new User(queries.get("userId"), queries.get("password"), queries.get("name"), queries.get("email"));
 				DataBase.addUser(user);
 				log.debug("User : {}", user);
 				response302Header(dos, "/index.html");
 				return;
-			}else if(URL.equals("/user/login")){
+			}else if(URL.startsWith("/user/login")){
 				User user = DataBase.findUserById(queries.get("userId"));
 				String logined = null;
 				if(user != null && user.getPassword().equals(queries.get("password"))) {
@@ -92,7 +93,7 @@ public class RequestHandler extends Thread {
 				body = readFile(URL);
 				response302HeaderWithCookie(dos, "logined", logined, URL);
 				responseBody(dos, body);
-			}else if(URL.equals("/user/list")) {
+			}else if(URL.startsWith("/user/list")) {
 				Map<String, String> cookies = HttpRequestUtils.parseCookies(header.get("Cookie"));
 				boolean logined = false;
 				if(cookies.get("logined") != null) {
@@ -102,10 +103,15 @@ public class RequestHandler extends Thread {
 				if(logined) {
 					StringBuilder sb = new StringBuilder();
 					Collection<User> users = DataBase.findAll();
+					sb.append("<table border='1'>");
 					for(User user : users) {
-						sb.append(user);
-						sb.append("</br>");
+						sb.append("<tr>");
+						sb.append("<td>" + user.getUserId() + "</td>");
+						sb.append("<td>" + user.getName() + "</td>");
+						sb.append("<td>" + user.getEmail() + "</td>");
+						sb.append("</tr>");
 					}
+					sb.append("</table>");
 					body = sb.toString().getBytes();
 				}else {
 					URL = "/index.html";
