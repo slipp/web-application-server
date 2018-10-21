@@ -14,11 +14,10 @@ import org.slf4j.LoggerFactory;
 public class HttpResponse {
 	private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
-	private Map<String, String> headers;
+	private Map<String, String> headers = new HashMap<>();
 	private DataOutputStream dos;
 
 	public HttpResponse(OutputStream os) {
-		headers = new HashMap<>();
 		dos = new DataOutputStream(os);
 	}
 

@@ -14,6 +14,7 @@ import controller.Controller;
 import controller.CreateUserController;
 import controller.ListUserController;
 import controller.LoginController;
+import controller.RequestMapping;
 import util.HttpRequest;
 import util.HttpResponse;
 
@@ -21,12 +22,9 @@ public class RequestHandler extends Thread {
 	private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
 	private Socket connection;
-	private Map<String, Controller> controllers;
 	
 	public RequestHandler(Socket connectionSocket) {
 		this.connection = connectionSocket;
-		this.controllers = new HashMap<>();
-		generateController();
 	}
 
 	public void run() {
@@ -37,22 +35,25 @@ public class RequestHandler extends Thread {
 			HttpRequest request = new HttpRequest(in);
 			HttpResponse response = new HttpResponse(out);
 			
-			String URL = request.getPath();
-
-			if (URL.equals("/"))
-				URL = "/index.html";
+			Controller controller = RequestMapping.getController(request.getPath());
 			
-			if(URL.contains(".")) response.forward(URL);
-			else controllers.get(URL).service(request, response);
+			if(controller == null) {
+				String path = getDefaultPath(request.getPath());
+				response.forward(path);
+			}else {
+				controller.service(request, response);
+			}
 			
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
 	}
 	
-	private void generateController() {
-		controllers.put("/user/create", new CreateUserController());
-		controllers.put("/user/login", new LoginController());
-		controllers.put("/user/list", new ListUserController());
+	private String getDefaultPath(String path) {
+		if(path.equals("/")) {
+			return "/index.html";
+		}
+		
+		return path;
 	}
 }

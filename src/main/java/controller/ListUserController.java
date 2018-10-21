@@ -12,9 +12,7 @@ import util.HttpResponse;
 public class ListUserController extends AbstractController {
 	@Override
 	public void doGet(HttpRequest request, HttpResponse response) {
-		Map<String, String> cookies = HttpRequestUtils.parseCookies(request.getHeader("Cookie"));
-
-		if (isLogin(cookies.get("logined"))) {
+		if (isLogin(request.getCookie("logined"))) {
 			StringBuilder sb = new StringBuilder();
 			Collection<User> users = DataBase.findAll();
 			sb.append("<table border='1'>");

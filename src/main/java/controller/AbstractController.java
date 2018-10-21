@@ -4,21 +4,22 @@ import util.HttpMethod;
 import util.HttpRequest;
 import util.HttpResponse;
 
-abstract public class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
 
 	@Override
 	public void service(HttpRequest request, HttpResponse response) {
 		HttpMethod method = request.getMethod();
-		if(method == HttpMethod.GET) {
-			doGet(request, response);
-		}else if(method == HttpMethod.POST) {
+		
+		if(method.isPost()) {
 			doPost(request, response);
+		}else {
+			doGet(request, response);
 		}
 	}
 
-	public void doPost(HttpRequest request, HttpResponse response) {
+	protected void doPost(HttpRequest request, HttpResponse response) {
 	}
 	
-	public void doGet(HttpRequest request, HttpResponse response) {
+	protected void doGet(HttpRequest request, HttpResponse response) {
 	}
 }

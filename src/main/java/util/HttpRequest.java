@@ -17,6 +17,7 @@ public class HttpRequest {
 
 	private Map<String, String> header = new HashMap<>();
 	private Map<String, String> params = new HashMap<>();
+	private Map<String, String> cookies = new HashMap<>();
 	private RequestLine requestLine;
 
 	public HttpRequest(InputStream in) {
@@ -43,6 +44,11 @@ public class HttpRequest {
 			} else {
 				params = requestLine.getParams();
 			}
+
+			if (header.containsKey("Cookie")) {
+				cookies = HttpRequestUtils.parseCookies(header.get("Cookie"));
+			}
+
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
@@ -66,5 +72,9 @@ public class HttpRequest {
 
 	public String getParameter(String paramName) {
 		return params.get(paramName);
+	}
+
+	public String getCookie(String cookieName) {
+		return cookies.get(cookieName);
 	}
 }
