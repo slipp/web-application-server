@@ -7,62 +7,57 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import util.HttpRequestUtils.Pair;
 
 public class HttpRequest {
-	private String method;
-	private String path;
-	private String version;
-	private Map<String, String> header;
-	private Map<String, String> params;
+	private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-	public HttpRequest(InputStream in) throws IOException {
-		header = new HashMap<>();
-		params = new HashMap<>();
-		BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		
-		String line = null;
-		line = br.readLine();
-		
-		if(line == null) {
-			return;
-		}
-		
-		String[] requestLine = line.split(" ");
-		
-		method = requestLine[0];
-		path = requestLine[1];
-		version = requestLine[2];
-		
-		while(!(line = br.readLine()).equals("")) {
-			Pair pair = HttpRequestUtils.parseHeader(line);
-			header.put(pair.getKey(), pair.getValue());
-		}
+	private Map<String, String> header = new HashMap<>();
+	private Map<String, String> params = new HashMap<>();
+	private RequestLine requestLine;
 
-		String queryString = null;
-		if(method.equals("GET")) {
-			if(path.contains("?")) {
-				queryString = path.substring(path.indexOf('?') + 1);
-				path = path.substring(0, path.indexOf('?'));
+	public HttpRequest(InputStream in) {
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+
+			String line = null;
+			line = br.readLine();
+
+			if (line == null) {
+				return;
 			}
-		}else if(method.equals("POST")) {
-			queryString = IOUtils.readData(br, Integer.parseInt(header.get("Content-Length")));
+
+			requestLine = new RequestLine(line);
+
+			while (!(line = br.readLine()).equals("")) {
+				Pair pair = HttpRequestUtils.parseHeader(line);
+				header.put(pair.getKey().trim(), pair.getValue().trim());
+			}
+
+			if (getMethod().isPost()) {
+				String body = IOUtils.readData(br, Integer.parseInt(header.get("Content-Length")));
+				params = HttpRequestUtils.parseQueryString(body);
+			} else {
+				params = requestLine.getParams();
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
 		}
-		
-		if(queryString != null)
-			params = HttpRequestUtils.parseQueryString(queryString);
 	}
 
-	public String getMethod() {
-		return method;
+	public HttpMethod getMethod() {
+		return requestLine.getMethod();
 	}
 
 	public String getPath() {
-		return path;
+		return requestLine.getPath();
 	}
 
 	public String getVersion() {
-		return version;
+		return requestLine.getVersion();
 	}
 
 	public String getHeader(String headerName) {
