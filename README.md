@@ -5,7 +5,7 @@
 * 빌드가 성공하면 반드시 refresh(fn + f5)를 실행해야 한다.
 
 # 웹 서버 시작 및 테스트
-* webserver.WebServer 는 사용자의 요청을 받아 RequestHandler에 작업을 위임하는 클래스이다.
+* webserver.WebServer 는 사용자의 요청을 받아 RequestHandler에 작업을 위임하는 클래스이다.s
 * 사용자 요청에 대한 모든 처리는 RequestHandler 클래스의 run() 메서드가 담당한다.
 * WebServer를 실행한 후 브라우저에서 http://localhost:8080으로 접속해 "Hello World" 메시지가 출력되는지 확인한다.
 
