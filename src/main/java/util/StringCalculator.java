@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class StringCalculator {
     public int add(String text) {
-        if(text.isEmpty() || text == null)
+        if(text == null || text.isEmpty())
             return 0;
         String[] numbers = preprocessor(text);
         return sum(numbers);
@@ -25,12 +25,12 @@ public class StringCalculator {
     private int sum(String[] numbers) {
         int total = 0;
         for(String number : numbers) {
-            total += isPossible(number);
+            total += stringToInt(number);
         }
         return total;
     }
 
-    private int isPossible(String num) {
+    private int stringToInt(String num) {
         int number = Integer.parseInt(num);
         if(number < 0) {
             throw new RuntimeException("음수입니다.");

@@ -13,8 +13,10 @@ public class StringCalculatorTest extends TestCase {
 
     public void testAdd() {
         assertEquals(0, cal.add(""));
+        assertEquals(0, cal.add(null));
         assertEquals(1, cal.add("1"));
         assertEquals(6, cal.add("1,2:3"));
         assertEquals(10, cal.add("//;\n1;2,3:4"));
+
     }
 }
