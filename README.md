@@ -15,7 +15,10 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
-* 
+* HTTP Header의 첫 번째 줄에서 /index.html 문자열을 가져오고자 함
+* inputStream을 한 줄씩 읽기 - split(" ")을 이용하여 문자열을 분리 - 형식이 GET (경로) HTTP/1.1 이길래 split을 통해 얻은 문자열 배열에서 1번째 인덱스에 있는 문자열을 가져옴(변수 url) - byte[] body에 함께 붙임
+* localhost:8080/index.html 실행 결과 성공했지만 오히려 localhost:8080은 Error가 발생하기 시작
+* 로그 출력을 통해 메인 페이지의 경우 경로가 /임을 확인 - "/".equals(url) 코드를 추가하여 메인이 아닌 경우에만 url을 body에 붙이도록 함.
 
 ### 요구사항 2 - get 방식으로 회원가입
 * 
