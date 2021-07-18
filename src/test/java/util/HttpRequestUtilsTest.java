@@ -3,8 +3,13 @@ package util;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import model.User;
 import org.junit.Test;
 
 import util.HttpRequestUtils.Pair;
@@ -21,6 +26,13 @@ public class HttpRequestUtilsTest {
         parameters = HttpRequestUtils.parseQueryString(queryString);
         assertThat(parameters.get("userId"), is("javajigi"));
         assertThat(parameters.get("password"), is("password2"));
+
+        queryString = "/user/create?userId=adfs&password=s&name=s&email=df%40adf";
+        Matcher m = Pattern.compile("(.*)\\?(.*)").matcher(queryString);
+        if(m.find()) {
+            String params = m.group(2);
+            assertThat(params, is("userId=adfs&password=s&name=s&email=df%40adf"));
+        }
     }
 
     @Test
