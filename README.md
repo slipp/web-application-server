@@ -21,7 +21,7 @@
 * 로그 출력을 통해 메인 페이지의 경우 경로가 /임을 확인 - "/".equals(url) 코드를 추가하여 메인이 아닌 경우에만 url을 body에 붙이도록 함.
 
 ### 요구사항 2 - get 방식으로 회원가입
-* HTTP Header의 첫 번째 줄에서 "?"가 존재하는지 패턴 확인 => Matcher m = Pattern.compile("(.*)\\?(.*)").matcher(url)
+* HTTP Header의 첫 번째 줄에서 "?"가 존재하는지 패턴 확인 => Matcher m = Pattern.compile("(.*)\\\?(.*)").matcher(url)
 * 존재하면 입력된 파라미터 파싱 & User 클래스에 저장
 
 ### 요구사항 3 - post 방식으로 회원가입
