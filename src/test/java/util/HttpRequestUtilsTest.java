@@ -33,6 +33,12 @@ public class HttpRequestUtilsTest {
             String params = m.group(2);
             assertThat(params, is("userId=adfs&password=s&name=s&email=df%40adf"));
         }
+
+        queryString = "Content-Length: 59";
+        if(queryString.contains("Content-Length")) {
+            String bodyLength = queryString.split(" ")[1];
+            assertThat(bodyLength, is(""));
+        }
     }
 
     @Test

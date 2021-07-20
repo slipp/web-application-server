@@ -22,7 +22,7 @@ public class IOUtilsTest {
 
     @Test
     public void readUrl() throws IOException {
-        String data = "GET / HTTP/1.1";
+        String data = "GET /user/form.html HTTP/1.1";
         StringReader sr = new StringReader(data);
         BufferedReader br = new BufferedReader(sr);
 

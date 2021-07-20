@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import model.User;
 import org.slf4j.Logger;
@@ -26,24 +24,19 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             DataOutputStream dos = new DataOutputStream(out);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             byte[] body = "Welcome to My Page :>".getBytes();
-            String line;
-
-            if((line = br.readLine()) != null) {
-                String url = readUrl(br, line);
-                if(!"/".equals(url)) {
-                    String path = url;
-                    Matcher m = Pattern.compile("(.*)\\?(.*)").matcher(url);
-                    if(m.find()) {
-                        path = m.group(1);
-                        String params = m.group(2);
-                        User user = createUser(params);
-                    }
-                    body = Files.readAllBytes(new File("./webapp" + path).toPath());
-                }
+            String[] headerInfo = readHttpHeader(br);
+            String url = headerInfo[0];
+            if(url.contains("html")) {
+                body = Files.readAllBytes(new File("./webapp" + url).toPath());
+            }
+            if(url.contains("/user/create")) {
+                int contentLength = Integer.parseInt(headerInfo[1]);
+                String params = util.IOUtils.readData(br, contentLength);
+                User user = createUser(params);
+                response302Header(dos);
             }
             response200Header(dos, body.length);
             responseBody(dos, body);
@@ -52,14 +45,18 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private String readUrl(BufferedReader br, String line) throws IOException{
+    private String[] readHttpHeader(BufferedReader br) throws IOException{
+        String line = br.readLine();
         String url = line.split(" ")[1];
+        String bodyLength = "";
         while(!"".equals(line)) {
             if(line == null) break;
+            if(line.contains("Content-Length")) {
+                bodyLength = line.split(" ")[1];
+            }
             line = br.readLine();
         }
-
-        return url;
+        return new String[]{url, bodyLength};
     }
 
     private User createUser(String params) {
@@ -77,6 +74,16 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: /index.html");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
