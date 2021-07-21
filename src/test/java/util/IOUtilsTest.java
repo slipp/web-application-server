@@ -3,10 +3,16 @@ package util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.DataTruncation;
 
+import db.DataBase;
+import model.User;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class IOUtilsTest {
     private static final Logger logger = LoggerFactory.getLogger(IOUtilsTest.class);
@@ -21,11 +27,12 @@ public class IOUtilsTest {
     }
 
     @Test
-    public void readUrl() throws IOException {
-        String data = "GET /user/form.html HTTP/1.1";
-        StringReader sr = new StringReader(data);
-        BufferedReader br = new BufferedReader(sr);
+    public void findUserById() {
+        User user1 = new User("id_1", "password_1", "name_1", "email_1");
+        User user2 = new User("id_2", "password_2", "name_2", "email_2");
+        DataBase.addUser(user1);
+        DataBase.addUser(user2);
 
-        logger.debug("parse body : {}", IOUtils.readUrl(br, data.length()));
+        assertThat(DataBase.findUserById("id_1"), is(user1));
     }
 }

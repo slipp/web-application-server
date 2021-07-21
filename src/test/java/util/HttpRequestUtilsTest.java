@@ -34,11 +34,7 @@ public class HttpRequestUtilsTest {
             assertThat(params, is("userId=adfs&password=s&name=s&email=df%40adf"));
         }
 
-        queryString = "Content-Length: 59";
-        if(queryString.contains("Content-Length")) {
-            String bodyLength = queryString.split(" ")[1];
-            assertThat(bodyLength, is(""));
-        }
+
     }
 
     @Test
@@ -88,4 +84,6 @@ public class HttpRequestUtilsTest {
         Pair pair = HttpRequestUtils.parseHeader(header);
         assertThat(pair, is(new Pair("Content-Length", "59")));
     }
+
+
 }
