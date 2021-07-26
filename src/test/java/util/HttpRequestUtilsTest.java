@@ -3,8 +3,11 @@ package util;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.StringReader;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,11 +82,11 @@ public class HttpRequestUtilsTest {
     }
 
     @Test
-    public void parseHeader() throws Exception {
-        String header = "Content-Length: 59";
-        Pair pair = HttpRequestUtils.parseHeader(header);
-        assertThat(pair, is(new Pair("Content-Length", "59")));
+    public void postKeyValue() throws Exception {
+        String data = "userId: java";
+        StringReader sr = new StringReader(data);
+        BufferedReader br = new BufferedReader(sr);
+        Map<String, String> query = HttpRequestUtils.parseHeader(br);
+        assertThat(query.get("userId"), is("java"));
     }
-
-
 }

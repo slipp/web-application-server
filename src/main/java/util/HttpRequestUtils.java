@@ -52,12 +52,6 @@ public class HttpRequestUtils {
         return new Pair(tokens[0], tokens[1]);
     }
 
-
-    public static Pair parseHeader(String header) {
-        return getKeyValue(header, ": ");
-    }
-
-
     public static Map<String, String> parseHeader(BufferedReader br) throws IOException {
         Map<String, String> header = new HashMap<>();
 
@@ -65,10 +59,8 @@ public class HttpRequestUtils {
             String line = br.readLine();
             if("".equals(line) || line == null) break;
 
-            Pair pair = getKeyValue(line, ": ");
-            if(pair != null) {
-                header.put(pair.getKey(), pair.getValue());
-            }
+            String[] parse = line.split(": ");
+            header.put(parse[0], parse[1]);
         }
 
         return header;
