@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Objects;
 
+import controller.BaseController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +44,27 @@ public class RequestHandler extends Thread {
                     log.debug(url);
                     body = Files.readAllBytes(new File(url).toPath());
                     break;
+                } else {
+                    final String requestUrl = tokens[1];
+                    executeController(requestUrl);
                 }
             }
             line = bufferedReader.readLine();
         }
         return body;
+    }
+
+    public static void executeController(String request) {
+        final String[] split = request.split("\\?");
+        final String url = split[0];
+        log.debug(String.format("requestUrl: %s", url));
+
+        if (2 <= split.length) {
+            if ("/user/create".equals(url)) {
+                // TODO: 매개변수에 변수명 못 붙이나?
+                BaseController.join(split[1]);
+            }
+        }
     }
 
     private void sendResponse(OutputStream out, byte[] response) {
