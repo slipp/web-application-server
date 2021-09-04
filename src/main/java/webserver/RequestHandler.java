@@ -1,10 +1,10 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +24,41 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            final byte[] response = readHTML(in);
+            sendResponse(out, response);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
+    private byte[] readHTML(InputStream in) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+        byte[] body = "helloWorld".getBytes();
+        String line = bufferedReader.readLine();
+        while (!"".equals(line) || Objects.isNull(line)) {
+            String[] tokens = line.split("\\s");
+            if ("GET".equals(Arrays.stream(tokens).findFirst().get())) {
+                if (tokens.length > 2 && tokens[1].contains(".html")) {
+                    final String url = "./webapp" + tokens[1];
+                    log.debug(url);
+                    body = Files.readAllBytes(new File(url).toPath());
+                    break;
+                }
+            }
+            line = bufferedReader.readLine();
+        }
+        return body;
+    }
+
+    private void sendResponse(OutputStream out, byte[] response) {
+        DataOutputStream dos = new DataOutputStream(out);
+        response200Header(dos, response.length);
+        responseBody(dos, response);
+    }
+
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("HTTP/1.1 200 OK \r\n"); // 문자열을 bytes로 변환해서 write
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
