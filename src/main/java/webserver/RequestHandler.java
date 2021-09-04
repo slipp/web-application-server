@@ -9,6 +9,7 @@ import java.util.Objects;
 import controller.BaseController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -31,11 +32,14 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
-
+    
     private byte[] readHTML(InputStream in) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         byte[] body = "helloWorld".getBytes();
         String line = bufferedReader.readLine();
+        /**
+         * Header의 데이터만 읽고 있음.
+         */
         while (!"".equals(line) || Objects.isNull(line)) {
             String[] tokens = line.split("\\s");
             if ("GET".equals(Arrays.stream(tokens).findFirst().get())) {
@@ -43,12 +47,21 @@ public class RequestHandler extends Thread {
                     final String url = "./webapp" + tokens[1];
                     log.debug(url);
                     body = Files.readAllBytes(new File(url).toPath());
-                    break;
                 } else {
                     final String requestUrl = tokens[1];
                     executeController(requestUrl);
                 }
+            } else {
+                String[] headerToken = line.split(": ");
+                if("Content-Length".equals(headerToken[0])){
+                    // Body 읽기
+                    String requestBody = IOUtils.readData(bufferedReader, Integer.parseInt(headerToken[1]));
+                    log.debug("RequestBody: {}", requestBody);
+                    // TODO: 어떤 요청에 대한 처리인지 모름 → /user/create 구별 안됨.
+                    BaseController.join(requestBody);
+                }
             }
+            log.debug(line);
             line = bufferedReader.readLine();
         }
         return body;
@@ -57,12 +70,13 @@ public class RequestHandler extends Thread {
     public static void executeController(String request) {
         final String[] split = request.split("\\?");
         final String url = split[0];
-        log.debug(String.format("requestUrl: %s", url));
+        log.debug("requestUrl: {}", url);
 
         if (2 <= split.length) {
-            if ("/user/create".equals(url)) {
+            if(url.startsWith("/user/create")){
                 // TODO: 매개변수에 변수명 못 붙이나?
                 BaseController.join(split[1]);
+                // TODO: 만약? Index.html로 리다이렉트 하려면?
             }
         }
     }

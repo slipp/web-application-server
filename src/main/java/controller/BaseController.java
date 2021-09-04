@@ -14,6 +14,6 @@ public class BaseController {
         final Map<String, String> request = HttpRequestUtils.parseQueryString(queryString);
         final User user = new User(request);
         DataBase.addUser(user);
-        logger.debug(String.format("새로운 user 추가됨. >> %s", user.toString()));
+        logger.debug("새로운 user 추가됨. >> {}", user.toString());
     }
 }
