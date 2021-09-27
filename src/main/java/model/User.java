@@ -17,8 +17,8 @@ public class User {
         this.email = email;
     }
 
-    public User(final Map<String, String> request) {
-        final Set<Map.Entry<String, String>> entries = request.entrySet();
+    public User(final Map<String, String> data) {
+        final Set<Map.Entry<String, String>> entries = data.entrySet();
         final Iterator<Map.Entry<String, String>> iterator = entries.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();

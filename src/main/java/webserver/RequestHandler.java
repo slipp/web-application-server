@@ -3,80 +3,94 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
-import controller.BaseController;
+import controller.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.IOUtils;
+import util.HttpRequestUtils;
 
+/**
+ * Note: 참고할  RequestHandler: com.sun.tools.sjavac.server.RequestHandler
+ */
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private Socket connection;
+    private Socket socket;
 
     public RequestHandler(Socket connectionSocket) {
-        this.connection = connectionSocket;
+        this.socket = connectionSocket;
     }
 
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", socket.getInetAddress(),
+                socket.getPort());
+        // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+             OutputStream out = socket.getOutputStream()) {
 
-        try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            final byte[] response = readHTML(in);
-            sendResponse(out, response);
+            // Request Head를 분석
+            final HttpRequest request = setRequestHeader(bufferedReader);
+            log.info(request.toString());
+            // TODO: ViewResolver 생성
+            byte[] body = createByteData(request);
+            sendResponse(out, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
-    
-    private byte[] readHTML(InputStream in) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+
+    private byte[] createByteData(HttpRequest request) throws IOException {
         byte[] body = "helloWorld".getBytes();
-        String line = bufferedReader.readLine();
-        /**
-         * Header의 데이터만 읽고 있음.
-         */
-        while (!"".equals(line) || Objects.isNull(line)) {
-            String[] tokens = line.split("\\s");
-            if ("GET".equals(Arrays.stream(tokens).findFirst().get())) {
-                if (tokens.length > 2 && tokens[1].contains(".html")) {
-                    final String url = "./webapp" + tokens[1];
-                    log.debug(url);
-                    body = Files.readAllBytes(new File(url).toPath());
-                } else {
-                    final String requestUrl = tokens[1];
-                    executeController(requestUrl);
-                }
+
+        if (RequestLine.HttpMethod.GET.name().equals(request.getRequestLine().getMethod())) {
+            if (request.getRequestLine().getUrl().contains(".html")) {
+                log.info(request.getRequestLine().getUrl());
+                final String url = "./webapp" + request.getRequestLine().getUrl();
+                log.debug(url);
+                // TODO: 정의하지 않은 index // home으로 => 아파치단에서
+                // todo: 여기에서 view하지말기(이건 임시)
+                body = Files.readAllBytes(new File(url).toPath());
             } else {
-                String[] headerToken = line.split(": ");
-                if("Content-Length".equals(headerToken[0])){
-                    // Body 읽기
-                    String requestBody = IOUtils.readData(bufferedReader, Integer.parseInt(headerToken[1]));
-                    log.debug("RequestBody: {}", requestBody);
-                    // TODO: 어떤 요청에 대한 처리인지 모름 → /user/create 구별 안됨.
-                    BaseController.join(requestBody);
-                }
+                executeGetController(request);
             }
-            log.debug(line);
-            line = bufferedReader.readLine();
+        } else if(RequestLine.HttpMethod.POST.name().equals(request.getRequestLine().getMethod())){
+            executePostController(request);
         }
         return body;
     }
 
-    public static void executeController(String request) {
-        final String[] split = request.split("\\?");
+    private HttpRequest setRequestHeader(BufferedReader bufferedReader) throws IOException {
+        return new HttpRequestDefault(bufferedReader);
+    }
+
+    /**
+     * Get을 위한 컨트롤러(임시)
+     * @param request
+     */
+    public static void executeGetController(HttpRequest request) {
+        final String[] split = request.getRequestLine().getUrl().split("\\?");
         final String url = split[0];
         log.debug("requestUrl: {}", url);
 
-        if (2 <= split.length) {
-            if(url.startsWith("/user/create")){
-                // TODO: 매개변수에 변수명 못 붙이나?
-                BaseController.join(split[1]);
-                // TODO: 만약? Index.html로 리다이렉트 하려면?
+        if (Objects.nonNull(request)) {
+            if (url.startsWith("/user/create")) {
+                // Note: Get일 경우, QueryString 파싱하는 부분만 다름. => 데이터가 QueryString에 있다.
+                final Map<String, String> data = HttpRequestUtils.parseQueryString(split[1]);
+                UserService.join(data);
+            }
+        }
+    }
+
+    public static void executePostController(HttpRequest request) {
+        final String url = request.getRequestLine().getUrl();
+        log.debug("requestUrl: {}", url);
+
+        if (Objects.nonNull(request)) {
+            if (url.startsWith("/user/create")) {
+                // Note: 데이터가 Body에 있다.
+                UserService.join(request.getRequestBody());
             }
         }
     }
