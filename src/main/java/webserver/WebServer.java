@@ -27,9 +27,9 @@ public class WebServer {
             log.info("Web Application Server started {} port.", port);
 
             // 클라이언트가 연결될때까지 대기한다.
-            Socket connection;
-            while ((connection = listenSocket.accept()) != null) {
-                RequestHandler requestHandler = new RequestHandler(connection);
+            Socket socket;
+            while ((socket = listenSocket.accept()) != null) {
+                RequestHandler requestHandler = new RequestHandler(socket);
                 requestHandler.start();
             }
         }
