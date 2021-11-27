@@ -1,13 +1,18 @@
 package util;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
+
+    private static Set<String> ALLOWED_HTTP_METHOD = new HashSet<String>(Arrays.asList(new String[]{"GET", "POST", "PUT", "DELETE"}));
+
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
@@ -51,6 +56,20 @@ public class HttpRequestUtils {
 
     public static Pair parseHeader(String header) {
         return getKeyValue(header, ": ");
+    }
+
+    public static boolean isHttpRequest(String requestLine) {
+        String[] arr = requestLine.split(" ");
+        return  arr.length !=3 &&
+               !arr[2].contains("HTTP") &&
+               !ALLOWED_HTTP_METHOD.contains(arr[0])
+                    ? false : true;
+    }
+
+    public static String getRequestURL(String requestLine) {
+        if(!isHttpRequest(requestLine)) { throw new RuntimeException("올바른 HTTP 요청이 아닙니다."); }
+        String requestUrl = requestLine.split(" ")[1];
+        return requestUrl.equals("/") ? "/index.html" : requestUrl;
     }
 
     public static class Pair {
