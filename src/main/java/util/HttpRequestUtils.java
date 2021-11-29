@@ -58,6 +58,7 @@ public class HttpRequestUtils {
         return getKeyValue(header, ": ");
     }
 
+
     public static boolean isHttpRequest(String requestLine) {
         String[] arr = requestLine.split(" ");
         return  arr.length !=3 &&
@@ -70,6 +71,11 @@ public class HttpRequestUtils {
         if(!isHttpRequest(requestLine)) { throw new RuntimeException("올바른 HTTP 요청이 아닙니다."); }
         String requestUrl = requestLine.split(" ")[1];
         return requestUrl.equals("/") ? "/index.html" : requestUrl;
+    }
+
+    public static String getHttpMethod(String requestLine) {
+        if(!isHttpRequest(requestLine)) { throw new RuntimeException("올바른 HTTP 요청이 아닙니다."); }
+        return requestLine.split(" ")[0];
     }
 
     public static class Pair {

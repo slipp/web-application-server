@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
+    private static String CLASS_PATH = "./webapp";
+
     private Socket connection;
 
     public RequestHandler(Socket connectionSocket) {
@@ -27,11 +29,13 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-            log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                    connection.getPort());
+            String requestLine = br.readLine();
+            log.debug("{}: {}", Thread.currentThread().getId(), requestLine);
+            ControllerDispatcher controllerDispatcher = new ControllerDispatcher(requestLine);
+            controllerDispatcher.dispatch();
 
             byte[] content =
-                    Files.readAllBytes(new File("./webapp" +getRequestURL(br.readLine())).toPath());
+                    Files.readAllBytes(new File("./webapp" +getRequestURL(requestLine)).toPath());
 
             //byte[] body = "Hello World2".getBytes();
             response200Header(dos, content.length);
