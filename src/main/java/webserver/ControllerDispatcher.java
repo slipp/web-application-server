@@ -10,24 +10,23 @@ import static util.HttpRequestUtils.getRequestURL;
 
 public class ControllerDispatcher {
 
-    private final String requestLine;
+    private final HttpRequest httpRequest;
 
-    public ControllerDispatcher(String requestLine) {
-        this.requestLine = requestLine;
+    public ControllerDispatcher(HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
 
     }
 
     public void dispatch() {
-        String requestUrl = getRequestURL(this.requestLine);
-        String httpMethod = getHttpMethod(this.requestLine);
-
         Map<String, Object> response = new HashMap<String, Object>();
+
+        String requestUrl = httpRequest.getRequestUri();
 
         if(requestUrl.equals("/")) {
             response.put("response", "index.html");
         }
         else if(requestUrl.startsWith("/user")) {
-            UserController userController = new UserController(requestUrl, httpMethod);
+            UserController userController = new UserController(httpRequest);
             userController.dispatch();
         }
     }

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.IOUtils;
 
 
 public class RequestHandler extends Thread {
@@ -29,13 +30,11 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-            String requestLine = br.readLine();
-            log.debug("{}: {}", Thread.currentThread().getId(), requestLine);
-            ControllerDispatcher controllerDispatcher = new ControllerDispatcher(requestLine);
+            ControllerDispatcher controllerDispatcher = new ControllerDispatcher(new HttpRequest(br));
             controllerDispatcher.dispatch();
 
             byte[] content =
-                    Files.readAllBytes(new File("./webapp" +getRequestURL(requestLine)).toPath());
+                    Files.readAllBytes(new File("./webapp/index.html").toPath());
 
             //byte[] body = "Hello World2".getBytes();
             response200Header(dos, content.length);

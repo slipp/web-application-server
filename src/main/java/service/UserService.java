@@ -15,12 +15,13 @@ public class UserService {
     }
 
     public User create(UserCreateRequestDto userCreateRequestDto) {
-        log.debug("====================[USER CREATE]====================");
+        log.debug("====================[USER CREATE START]====================");
         if(DataBase.findUserById(userCreateRequestDto.getUserId()) != null) {
             throw new RuntimeException("이미 존재하는 아이디 입니다.");
         }
         DataBase.addUser(userCreateRequestDto.toEntity());
         log.debug("USER CREATED: {}",DataBase.findUserById(userCreateRequestDto.getUserId()).toString());
+        log.debug("====================[USER CREATE END]====================");
         return DataBase.findUserById(userCreateRequestDto.getUserId());
     }
 
