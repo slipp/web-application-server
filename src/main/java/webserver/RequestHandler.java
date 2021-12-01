@@ -1,13 +1,14 @@
 package webserver;
 
-import static util.HttpRequestUtils.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import util.IOUtils;
+import static common.ParameterConstants.HTTP_VERSION;
+import static common.ParameterConstants.STATIC_RESOURCES_PATH;
 
 
 public class RequestHandler extends Thread {
@@ -31,23 +32,23 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
             ControllerDispatcher controllerDispatcher = new ControllerDispatcher(new HttpRequest(br));
-            controllerDispatcher.dispatch();
+            HttpResponse httpResponse = controllerDispatcher.dispatch();
 
             byte[] content =
-                    Files.readAllBytes(new File("./webapp/index.html").toPath());
+                    Files.readAllBytes(new File(STATIC_RESOURCES_PATH+httpResponse.getBody()).toPath());
 
-            //byte[] body = "Hello World2".getBytes();
-            response200Header(dos, content.length);
+            responseHeader(dos, content.length, httpResponse);
             responseBody(dos, content);
+
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void responseHeader(DataOutputStream dos, int lengthOfBodyContent, HttpResponse httpResponse) {
         try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes(HTTP_VERSION+" "+httpResponse.getStatus()+" "+httpResponse.getMessage()+" "+"\r\n");
+            dos.writeBytes("Content-Type: "+httpResponse.getContent_Type()+"\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -63,4 +64,5 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
+
 }

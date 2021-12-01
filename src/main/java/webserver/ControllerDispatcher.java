@@ -1,6 +1,7 @@
 package webserver;
 
 import static util.HttpRequestUtils.*;
+import static common.ParameterConstants.*;
 
 import controller.UserController;
 import java.util.HashMap;
@@ -17,18 +18,16 @@ public class ControllerDispatcher {
 
     }
 
-    public void dispatch() {
+    public HttpResponse dispatch() {
         Map<String, Object> response = new HashMap<String, Object>();
 
         String requestUrl = httpRequest.getRequestUri();
 
-        if(requestUrl.equals("/")) {
-            response.put("response", "index.html");
-        }
-        else if(requestUrl.startsWith("/user")) {
+        if(requestUrl.startsWith("/user")) {
             UserController userController = new UserController(httpRequest);
-            userController.dispatch();
+            return userController.dispatch();
         }
-    }
 
+        return new HttpResponse("200", "OK", null, CONTENT_TYPE_STRING);
+    }
 }
