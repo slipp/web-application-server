@@ -7,14 +7,12 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 
-import static common.ParameterConstants.HTTP_VERSION;
-import static common.ParameterConstants.STATIC_RESOURCES_PATH;
+import static common.ParameterConstants.*;
 
 
 public class RequestHandler extends Thread {
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private static String CLASS_PATH = "./webapp";
+    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
 
@@ -34,6 +32,8 @@ public class RequestHandler extends Thread {
             ControllerDispatcher controllerDispatcher = new ControllerDispatcher(new HttpRequest(br));
             HttpResponse httpResponse = controllerDispatcher.dispatch();
 
+            log.debug("PATH: {}", STATIC_RESOURCES_PATH+httpResponse.getBody());
+
             byte[] content =
                     Files.readAllBytes(new File(STATIC_RESOURCES_PATH+httpResponse.getBody()).toPath());
 
@@ -47,9 +47,18 @@ public class RequestHandler extends Thread {
 
     private void responseHeader(DataOutputStream dos, int lengthOfBodyContent, HttpResponse httpResponse) {
         try {
+            log.debug("HTTP_VERSION: {}", HTTP_VERSION);
+            log.debug("HTTP_STATUS: {}", httpResponse.getStatus());
+            log.debug("HTTP_MESSAGE: {}", httpResponse.getMessage());
+            log.debug("HTTP_CONTENT_TYPE: {}", httpResponse.getContent_Type());
+
             dos.writeBytes(HTTP_VERSION+" "+httpResponse.getStatus()+" "+httpResponse.getMessage()+" "+"\r\n");
             dos.writeBytes("Content-Type: "+httpResponse.getContent_Type()+"\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            if(httpResponse.getStatus().equals(HTTP_STATUS_CODE_302)) {
+                dos.writeBytes("location: " + HOST+httpResponse.getBody() + "\r\n");
+                log.debug("location: {}", HOST+httpResponse.getBody());
+            }
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

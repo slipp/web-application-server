@@ -67,10 +67,9 @@ public class HttpRequestUtils {
                     ? false : true;
     }
 
-    public static String getRequestURL(String requestLine) {
+    public static String getRequestUri(String requestLine) {
         if(!isHttpRequest(requestLine)) { throw new RuntimeException("올바른 HTTP 요청이 아닙니다."); }
-        String requestUrl = requestLine.split(" ")[1];
-        return requestUrl.equals("/") ? "/index.html" : requestUrl;
+        return requestLine.split(" ")[1];
     }
 
     public static String getHttpMethod(String requestLine) {

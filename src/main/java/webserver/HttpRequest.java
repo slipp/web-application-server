@@ -1,5 +1,7 @@
 package webserver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import util.IOUtils;
 
@@ -10,6 +12,8 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+
     private final String requestLine;
     private final String httpMethod;
     private final String requestUri;
@@ -19,7 +23,7 @@ public class HttpRequest {
     public HttpRequest(BufferedReader br) throws IOException {
         this.requestLine = br.readLine();
         this.httpMethod = HttpRequestUtils.getHttpMethod(requestLine);
-        this.requestUri = HttpRequestUtils.getRequestURL(requestLine);
+        this.requestUri = HttpRequestUtils.getRequestUri(requestLine);
         this.headers = new HashMap<String, String>();
 
         while(true) {

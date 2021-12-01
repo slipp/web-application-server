@@ -27,7 +27,7 @@ public class UserController {
         String httpMethod = httpRequest.getHttpMethod();
         String body       = httpRequest.getBody();
 
-        if(requestUri.startsWith("/user/create")&&httpMethod.equals("POST")) {
+        if(requestUri.startsWith("/user/create")&&httpMethod.equals(HTTP_METHOD_POST)) {
             return post_create(body);
         }
 
@@ -43,7 +43,7 @@ public class UserController {
 
         userService.create(userCreateRequestDto);
 
-        HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_302, HTTP_STATUS_MESSAGE_FOUND, PATH_HOME, CONTENT_TYPE_STRING);
+        HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_302, HTTP_STATUS_MESSAGE_FOUND, PATH_INDEX_PAGE, CONTENT_TYPE_STRING);
 
         return httpResponse;
     }

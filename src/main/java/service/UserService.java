@@ -1,5 +1,6 @@
 package service;
 
+import controller.dto.UserLoginRequestDto;
 import db.DataBase;
 import controller.dto.UserCreateRequestDto;
 import model.User;
@@ -23,6 +24,15 @@ public class UserService {
         log.debug("USER CREATED: {}",DataBase.findUserById(userCreateRequestDto.getUserId()).toString());
         log.debug("====================[USER CREATE END]====================");
         return DataBase.findUserById(userCreateRequestDto.getUserId());
+    }
+
+    public User login(UserLoginRequestDto userLoginDto) {
+        log.debug("====================[USER LOGIN START]====================");
+        User user = DataBase.findUserById(userLoginDto.getUserId());
+        if(user.getUserId() == null) throw new RuntimeException("존재하지 않는 아이디 입니다.");
+        if(user.getPassword() != userLoginDto.getPassword()) throw new RuntimeException("잘못된 패스워드 입니다.");
+        log.debug("====================[USER LOGIN END]====================");
+        return user;
     }
 
 }
