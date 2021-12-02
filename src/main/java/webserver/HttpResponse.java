@@ -10,8 +10,11 @@ public class HttpResponse {
     private final String status;
     private final String message;
     private final String body;
-    private Map<String, String> headers;
+
+    /* header */
     private final String Content_Type;
+    private String location;
+    private String cookies;
 
     public HttpResponse(String status, String message, String body, String Content_Type) {
         this.status = status;
@@ -32,17 +35,27 @@ public class HttpResponse {
         return message;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) { this.headers = headers; }
-
     public String getBody() {
         return body;
     }
 
     public String getContent_Type() { return Content_Type; }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(String cookies) {
+        this.cookies = cookies;
+    }
 
     @Override
     public String toString() {
@@ -51,7 +64,6 @@ public class HttpResponse {
                 ", status='" + status + '\'' +
                 ", message='" + message + '\'' +
                 ", body='" + body + '\'' +
-                ", headers=" + headers +
                 '}';
     }
 }

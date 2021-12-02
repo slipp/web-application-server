@@ -7,6 +7,11 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class UserService {
 
@@ -30,9 +35,19 @@ public class UserService {
         log.debug("====================[USER LOGIN START]====================");
         User user = DataBase.findUserById(userLoginDto.getUserId());
         if(user.getUserId() == null) throw new RuntimeException("존재하지 않는 아이디 입니다.");
-        if(user.getPassword() != userLoginDto.getPassword()) throw new RuntimeException("잘못된 패스워드 입니다.");
+        if(!user.getPassword().equals(userLoginDto.getPassword())) throw new RuntimeException("잘못된 패스워드 입니다.");
         log.debug("====================[USER LOGIN END]====================");
         return user;
+    }
+
+    public List<User> findAllUser(){
+        log.debug("====================[findAllUser START]====================");
+        List<User> userList = DataBase.findAll().stream().collect(Collectors.toCollection(ArrayList::new));
+        for (User user : userList) {
+            log.debug("{}", user);
+        }
+        log.debug("====================[findAllUser END]====================");
+        return userList;
     }
 
 }

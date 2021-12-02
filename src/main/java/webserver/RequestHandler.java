@@ -34,8 +34,12 @@ public class RequestHandler extends Thread {
 
             log.debug("PATH: {}", STATIC_RESOURCES_PATH+httpResponse.getBody());
 
-            byte[] content =
-                    Files.readAllBytes(new File(STATIC_RESOURCES_PATH+httpResponse.getBody()).toPath());
+            byte[] content = new byte[0];
+
+            if(httpResponse.getContent_Type().equals(CONTENT_TYPE_TEXT_HTML)) {
+                content =
+                        Files.readAllBytes(new File(STATIC_RESOURCES_PATH+httpResponse.getBody()).toPath());
+            }
 
             responseHeader(dos, content.length, httpResponse);
             responseBody(dos, content);
@@ -51,6 +55,8 @@ public class RequestHandler extends Thread {
             log.debug("HTTP_STATUS: {}", httpResponse.getStatus());
             log.debug("HTTP_MESSAGE: {}", httpResponse.getMessage());
             log.debug("HTTP_CONTENT_TYPE: {}", httpResponse.getContent_Type());
+            log.debug("HTTP_CONTENT_LENGTH: {}", lengthOfBodyContent);
+            log.debug("HTTP_COOKIES: {}", httpResponse.getCookies());
 
             dos.writeBytes(HTTP_VERSION+" "+httpResponse.getStatus()+" "+httpResponse.getMessage()+" "+"\r\n");
             dos.writeBytes("Content-Type: "+httpResponse.getContent_Type()+"\r\n");
@@ -58,6 +64,11 @@ public class RequestHandler extends Thread {
             if(httpResponse.getStatus().equals(HTTP_STATUS_CODE_302)) {
                 dos.writeBytes("location: " + HOST+httpResponse.getBody() + "\r\n");
                 log.debug("location: {}", HOST+httpResponse.getBody());
+            }
+
+            if(httpResponse.getCookies() != null) {
+                dos.writeBytes("Set-Cookie: " + httpResponse.getCookies() + "\r\n");
+                log.debug("cookies: {}", httpResponse.getBody());
             }
             dos.writeBytes("\r\n");
         } catch (IOException e) {

@@ -25,15 +25,22 @@ public class HttpRequest {
         this.httpMethod = HttpRequestUtils.getHttpMethod(requestLine);
         this.requestUri = HttpRequestUtils.getRequestUri(requestLine);
         this.headers = new HashMap<String, String>();
-
+        log.debug("{}","====================[HTTP REQUEST START]====================");
+        log.debug("REQUEST_LINE: {}",requestLine);
+        log.debug("HTTP_METHOD: {}",httpMethod);
+        log.debug("REQUEST_URI: {}",requestUri);
+        log.debug("{}","--------------------[HEADER START]--------------------");
         while(true) {
             String header = br.readLine();
             if(header == null || "".equals(header)) break;
             HttpRequestUtils.Pair pair = HttpRequestUtils.parseHeader(header);
             this.headers.put(pair.getKey(), pair.getValue());
+            log.debug("{}: {}", pair.getKey(), pair.getValue());
         }
+        log.debug("{}","--------------------[HEADER END]--------------------");
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length","0"));
         this.body = contentLength > 0 ? IOUtils.readData(br, contentLength) : "";
+        log.debug("{}","====================[HTTP REQUEST END]====================");
     }
 
     public String getRequestLine() {

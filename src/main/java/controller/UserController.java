@@ -1,50 +1,1 @@
-package controller;
-
-import static common.ParameterConstants.*;
-
-import controller.dto.UserCreateRequestDto;
-import service.UserService;
-import util.HttpRequestUtils;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
-
-import java.util.HashMap;
-import java.util.Map;
-
-public class UserController {
-
-    private final HttpRequest httpRequest;
-    private UserService userService = new UserService();
-
-    public UserController(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
-    }
-
-    public HttpResponse dispatch() {
-        Map<String, Object> response = new HashMap<String, Object>();
-
-        String requestUri = httpRequest.getRequestUri();
-        String httpMethod = httpRequest.getHttpMethod();
-        String body       = httpRequest.getBody();
-
-        if(requestUri.startsWith("/user/create")&&httpMethod.equals(HTTP_METHOD_POST)) {
-            return post_create(body);
-        }
-
-        return null;
-    }
-
-    private HttpResponse post_create(String body) {
-        Map<String, String> parameters = HttpRequestUtils.parseQueryString(body);
-
-        UserCreateRequestDto userCreateRequestDto =
-                new UserCreateRequestDto(parameters.get("userId"), parameters.get("password"),
-                                         parameters.get("name"), parameters.get("email"));
-
-        userService.create(userCreateRequestDto);
-
-        HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_302, HTTP_STATUS_MESSAGE_FOUND, PATH_INDEX_PAGE, CONTENT_TYPE_STRING);
-
-        return httpResponse;
-    }
-}
+package controller;import controller.dto.UserCreateRequestDto;import controller.dto.UserLoginRequestDto;import model.User;import org.slf4j.Logger;import org.slf4j.LoggerFactory;import service.UserService;import util.HttpRequestUtils;import webserver.HttpRequest;import webserver.HttpResponse;import java.util.HashMap;import java.util.List;import java.util.Map;import static common.ParameterConstants.*;public class UserController {    private final HttpRequest httpRequest;    private UserService userService = new UserService();    private static final Logger log = LoggerFactory.getLogger(UserController.class);    public UserController(HttpRequest httpRequest) {        this.httpRequest = httpRequest;    }    public HttpResponse dispatch() {        Map<String, Object> response = new HashMap<String, Object>();        String requestUri = httpRequest.getRequestUri();        String httpMethod = httpRequest.getHttpMethod();        String body       = httpRequest.getBody();        if(requestUri.startsWith("/user/create")&&httpMethod.equals(HTTP_METHOD_POST)) {            return post_create(body);        }        if(requestUri.startsWith("/user/login")&&httpMethod.equals(HTTP_METHOD_POST)) {            return post_login(body);        }        if(requestUri.startsWith("/user/list")&&httpMethod.equals(HTTP_METHOD_GET)) {            return get_list(body);        }        return null;    }    private HttpResponse post_create(String body) {        Map<String, String> parameters = HttpRequestUtils.parseQueryString(body);        UserCreateRequestDto userCreateRequestDto =                new UserCreateRequestDto(parameters.get("userId"), parameters.get("password"),                                         parameters.get("name"), parameters.get("email"));        userService.create(userCreateRequestDto);        HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_302, HTTP_STATUS_MESSAGE_FOUND, PATH_INDEX_PAGE, CONTENT_TYPE_TEXT_HTML);        return httpResponse;    }    private HttpResponse post_login(String body) {        Map<String, String> parameters = HttpRequestUtils.parseQueryString(body);        UserLoginRequestDto userLoginRequestDto =                new UserLoginRequestDto(parameters.get("userId"), parameters.get("password"));        User user = userService.login(userLoginRequestDto);        if(user.getUserId() == null) {            HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_200, HTTP_STATUS_MESSAGE_OK, PATH_LOGIN_FAIL, CONTENT_TYPE_TEXT_HTML);            httpResponse.setCookies("logined=false");            return httpResponse;        }        HttpResponse httpResponse = new HttpResponse(HTTP_STATUS_CODE_200, HTTP_STATUS_MESSAGE_OK, PATH_INDEX_PAGE, CONTENT_TYPE_TEXT_HTML);        httpResponse.setCookies("logined=true");        return httpResponse;    }        private HttpResponse get_list(String body) {        ;        Boolean logined = Boolean.parseBoolean(HttpRequestUtils.parseCookies(httpRequest.getHeaders().get("Cookie")).get("logined"));        log.debug("logined: {}", logined);        if(logined == null || logined == false) {            return new HttpResponse(HTTP_STATUS_CODE_302, HTTP_STATUS_MESSAGE_FOUND, PATH_LOGIN_PAGE, CONTENT_TYPE_TEXT_HTML);        }        List<User> userList = userService.findAllUser();        return new HttpResponse(HTTP_STATUS_CODE_200, HTTP_STATUS_MESSAGE_OK, "user/list.html", CONTENT_TYPE_TEXT_HTML);    }}
