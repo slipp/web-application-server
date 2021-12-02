@@ -19,6 +19,8 @@ public class ParameterConstants {
     public static final String HTTP_METHOD_DELETE = "DELETE";
 
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=UTF-8";
+    public static final String CONTENT_TYPE_TEXT_CSS = "text/css";
+    public static final String CONTENT_TYPE_TEXT_JS = "text/javascript";
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json;charset=UTF-8";
 
 

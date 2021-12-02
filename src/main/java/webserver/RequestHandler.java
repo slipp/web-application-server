@@ -34,12 +34,8 @@ public class RequestHandler extends Thread {
 
             log.debug("PATH: {}", STATIC_RESOURCES_PATH+httpResponse.getBody());
 
-            byte[] content = new byte[0];
-
-            if(httpResponse.getContent_Type().equals(CONTENT_TYPE_TEXT_HTML)) {
-                content =
+            byte[] content =
                         Files.readAllBytes(new File(STATIC_RESOURCES_PATH+httpResponse.getBody()).toPath());
-            }
 
             responseHeader(dos, content.length, httpResponse);
             responseBody(dos, content);
