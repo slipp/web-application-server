@@ -1,5 +1,7 @@
 package model;
 
+import controller.dto.UserCreateRequestDto;
+
 public class User {
     private String userId;
     private String password;
@@ -27,6 +29,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public UserCreateRequestDto toDto() {
+        return new UserCreateRequestDto(this.userId, this.password, this.name, this.email);
     }
 
     @Override
