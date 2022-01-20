@@ -28,7 +28,7 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
         	InputStreamReader reader = new InputStreamReader(in);
         	BufferedReader br = new BufferedReader(reader);
-        	System.out.println("[ReadLineText]"+br.readLine());
+        	System.out.println("[ReadLine]"+br.readLine());
         	
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello World".getBytes();
