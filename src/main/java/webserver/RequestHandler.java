@@ -29,6 +29,13 @@ public class RequestHandler extends Thread {
         	InputStreamReader reader = new InputStreamReader(in);
         	BufferedReader br = new BufferedReader(reader);
         	System.out.println("[ReadLineText]"+br.readLine());
+        	String line = br.readLine();
+        	
+        	System.out.println("textReadLine"+line);
+        	
+        	if(line == null) {
+        		
+        	}
         	
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello World".getBytes();
