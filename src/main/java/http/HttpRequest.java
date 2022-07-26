@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
+
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     public HttpRequest(InputStream is) {
