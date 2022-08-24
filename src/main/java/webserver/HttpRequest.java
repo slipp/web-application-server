@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,73 +15,59 @@ import util.IOUtils;
 
 public class HttpRequest {
 	private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
-
-	private String method;
-	private String path;
-	private Map<String, String> headers = new HashMap<String, String>();
-	private Map<String, String> params = new HashMap<String, String>();
-
+	
+	//HTTP 메소드 , URL, 헤더, 본문을 분리하는 작업을 한다. 
+	private RequestLine requestline;
+	private Map<String, String> headers = new HashMap<String, String>(); //헤더
+	private Map<String, String> params = new HashMap<String, String>(); //post로 들어오는 파리미터 받아오기 
+	private HttpMethod method;
+	
+	
 	public HttpRequest(InputStream in) {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 			String line = br.readLine();
-
+			
 			if (line == null) {
 				return;
 			}
-
-			processRequestLine(line);
-
-			while (line.equals("")) {
-				log.debug("header line: {}", line);
-				line = br.readLine();
-				String[] tokens = line.split(":");
-				headers.put(tokens[0].trim(), tokens[1].trim());
-
+			//1.request line 받아오기 
+			requestline = new RequestLine(line);
+			
+			
+			//2.header 받아오기 
+			line = br.readLine();
+			while (!line.equals("")) {
+				log.debug("header: {}", line); // header : Connection: keep-alive
+				String[] tokens = line.split(":"); // tokens = [Connection, keep-alive]
+				//2.1.해더는 Map<String,String>에 저장한다. 
+				headers.put(tokens[0].trim(), tokens[1].trim()); 
+				line = br.readLine(); 
+				
 			}
-			if("POST".equals(method)) {
+			if(method.POST.equals(getMethod())) {
 				String body = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
 				params = HttpRequestUtils.parseQueryString(body);
 				
+			}else {
+				//get 메소드인 경우 url에서 추출해왔으므로 그대로 담아주기 
+				params = requestline.getParams();
 			}
 		} catch (IOException io) {
 			log.error(io.getMessage());
 		}
 
 	}
-
-	private void processRequestLine(String requestline) {
-		log.debug("request line: {}", requestline); // GET /doc/text.html HTTP/1.1
-		String[] tokens = requestline.split(" ");
-		method = tokens[0]; // GET
-
-		if ("POST".equals(method)) {
-			path = tokens[1];
-			return;
-		}
-		int index = tokens[1].indexOf("?");
-		if (index == -1) {
-			path = tokens[1];
-		} else {
-			path = tokens[1].substring(0, index); // 잘라내고 싶은 범위 정하기 (0부터 index까지)
-			params = HttpRequestUtils.parseQueryString(tokens[1].substring(index + 1));// 파라미터 받아오기
-
-		}
-
-	}
-
-	public String getMethod() {
-		return method;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
+	
 	public String getHeader(String name) {
 		return headers.get(name);
 	}
-
+	public HttpMethod getMethod() {
+		return requestline.getMethod();
+	}
+	public String getPath() {
+		return requestline.getPath();
+	}
 	public String getParameter(String name) {
 		return params.get(name);
 	}
