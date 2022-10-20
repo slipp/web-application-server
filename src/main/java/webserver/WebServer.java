@@ -19,7 +19,6 @@ public class WebServer {
         }
 
         // 서버소켓을 생성한다. 웹서버는 기본적으로 8080번 포트를 사용한다.
-
         try (ServerSocket listenSocket = new ServerSocket(port)) {
             log.info("Web Application Server started {} port.", port);
 
