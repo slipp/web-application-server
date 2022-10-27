@@ -24,7 +24,6 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 
-            // ??
             InputStreamReader reader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(reader);
             String r;
@@ -33,9 +32,22 @@ public class RequestHandler extends Thread {
             if ((r = bufferedReader.readLine()) != null) {
                 log.info(r);
                 String[] split = r.split(" ");
+
+                if (split[1].equals("/user/create?")) {
+                    log.info("로그인 요청");
+                }
+
                 if (split[1].equals("/index.html")) {
                     log.info("index.html 요청입니다.");
 
+                    // 파일읽기
+                    bytes = Files.readAllBytes(new File(("./webapp" + split[1])).toPath());
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response200Header(dos, bytes.length);
+                    responseBody(dos, bytes);
+
+                }else if(split[1].equals("/user/form.html")){
+                    log.info("로그인 페이지 요청입니다.");
                     // 파일읽기
                     bytes = Files.readAllBytes(new File(("./webapp" + split[1])).toPath());
                     DataOutputStream dos = new DataOutputStream(out);
