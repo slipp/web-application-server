@@ -26,7 +26,7 @@ public class WebServer {
             // 클라이언트가 연결될때까지 대기한다.
             Socket connection;
             while ((connection = listenSocket.accept()) != null) {
-                RequestHandler requestHandler = new RequestHandler(connection);
+                DispatcherServlet requestHandler = new DispatcherServlet(connection);
                 requestHandler.start();
             }
         }

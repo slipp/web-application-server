@@ -9,7 +9,40 @@ import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
     /**
-     * @param queryString은
+     * @param firstLine
+     *            URL 전체임 / HTTP 헤더의 첫번째 줄
+     * @return
+     */
+    public static String extractMethodFromFirstLine(String firstLine){
+        return firstLine.split(" ")[0];
+    }
+
+    /**
+     * @param firstLine
+     *            URL 전체임 / HTTP 헤더의 첫번째 줄
+     * @return
+     */
+    public static String extractPathFromFirstLine(String firstLine){
+        return firstLine.split(" ")[1];
+    }
+
+
+    /**
+     * @param firstLine
+     *            URL 전체임 / HTTP 헤더의 첫번째 줄
+     * @return
+     */
+    public static String extractVersionFromFirstLine(String firstLine){
+        return firstLine.split(" ")[2];
+    }
+
+    public static String getUrlFromPath(String path){
+        String[] tokens =  path.split("\\?");
+        if(tokens.length > 0) return tokens[0];
+        return null;
+    }
+    /**
+     * @param queryString
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
@@ -18,7 +51,7 @@ public class HttpRequestUtils {
     }
 
     /**
-     * @param 쿠키
+     * @param cookies
      *            값은 name1=value1; name2=value2 형식임
      * @return
      */
@@ -36,7 +69,7 @@ public class HttpRequestUtils {
                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
     }
 
-    static Pair getKeyValue(String keyValue, String regex) {
+    public static Pair getKeyValue(String keyValue, String regex) {
         if (Strings.isNullOrEmpty(keyValue)) {
             return null;
         }
