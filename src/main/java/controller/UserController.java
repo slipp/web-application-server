@@ -27,7 +27,6 @@ public class UserController implements Controller {
             requestHeaders.put(pair.getKey(), pair.getValue());
             line = in.readLine();
         }
-        requestHeaders.forEach((k,v)->System.out.println(k+":    "+v));
 
         // extract & parse body
         int contentLength = Integer.valueOf(requestHeaders.get("Content-Length"));

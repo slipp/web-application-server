@@ -1,7 +1,9 @@
 package util;
 
 public enum HttpStatusCode {
-    OK(200, "OK"), CREATED(201, "CREATED"), FOUND(302, "FOUND"), NOT_FOUND(400,"NOT FOUND");
+    OK(200, "OK"), CREATED(201, "CREATED"),
+    FOUND(302, "FOUND"),
+    BAD_REQUEST(400, "BAD REQUEST"), NOT_FOUND(404, "NOT FOUND");
     private int code;
     private String message;
 
