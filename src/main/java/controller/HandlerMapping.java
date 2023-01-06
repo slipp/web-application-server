@@ -31,22 +31,22 @@ public class HandlerMapping {
         return mappings.get(path);
     }
 
-    private boolean isStaticPath(String path) {
+    private String getExtension(String path) {
         for (String staticFile : staticFiles) {
             String extension = path.substring(path.lastIndexOf(".")+1);
-            if (extension.equals(staticFile)) return true;
+            if (extension.equals(staticFile)) return extension;
         }
-        return false;
+        return null;
     }
 
 
-    public void resourceHandler(String path, BufferedReader br, DataOutputStream dos)throws IOException {
+    public void resourceHandler(String path,String extension, BufferedReader br, DataOutputStream dos)throws IOException {
         // body
         byte[] body = Files.readAllBytes(new File("./webapp"+path).toPath());
 
         // send header
         List<Header> headers = new ArrayList<>();
-        headers.add(new Header("Content-Type", "text/html;charset=utf-8"));
+        headers.add(new Header("Content-Type", "text/"+extension+";charset=utf-8"));
         headers.add(new Header("Content-Length", String.valueOf(body.length)));
         HttpResponseUtils.responseHeader(dos, HttpStatusCode.OK, headers);
 
@@ -56,9 +56,10 @@ public class HandlerMapping {
     }
 
     public void doService(String method, String path, BufferedReader br, DataOutputStream dos) throws IOException {
+        String extension = getExtension(path);
         // 정적 파일인 경우
-        if(isStaticPath(path)){
-            resourceHandler(path, br,dos);
+        if(extension!=null){
+            resourceHandler(path, extension, br,dos);
             return;
         }
 
