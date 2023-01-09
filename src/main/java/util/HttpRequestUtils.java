@@ -55,6 +55,14 @@ public class HttpRequestUtils {
      *            값은 name1=value1; name2=value2 형식임
      * @return
      */
+
+    public static boolean isLogin(String headerLine){
+        String[] headerToken = headerLine.split(":");
+        Map<String, String> cookies = HttpRequestUtils.parseCookies(headerToken[1].trim());
+        String value = cookies.get("logined");
+        if(value == null) return false;
+        return  Boolean.valueOf(value);
+    }
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
     }

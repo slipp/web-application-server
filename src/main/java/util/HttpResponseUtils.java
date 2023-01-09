@@ -17,11 +17,12 @@ public class HttpResponseUtils {
     public static void responseHeader(DataOutputStream dos,HttpVersion version, HttpStatusCode code, List<Header> headers) {
         StringBuffer firstLine = new StringBuffer();
         firstLine.append(version.getVersion());
+        firstLine.append(" ");
         firstLine.append(code.getCode());
         firstLine.append(" ");
         firstLine.append(code.getMessage());
         firstLine.append(" \r\n");
-
+        System.out.println(firstLine);
         try {
             dos.writeBytes(firstLine.toString());
             for (Header header : headers) {
@@ -30,6 +31,7 @@ public class HttpResponseUtils {
                 line.append(": ");
                 line.append(header.getValue());
                 line.append("\r\n");
+                System.out.println(line);
                 dos.writeBytes(line.toString());
             }
             dos.writeBytes("\r\n");

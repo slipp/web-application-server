@@ -70,8 +70,5 @@ public class LoginController implements Controller {
         headers.add(new Header("Location", "http://localhost:8080/index.html"));
         headers.forEach(System.out::println);
         HttpResponseUtils.responseHeader(out, HttpVersion.HTTP_V1,HttpStatusCode.FOUND, headers);
-
-
-
     }
 }
