@@ -1,8 +1,6 @@
 package controller;
 
-import util.Header;
-import util.HttpRequestUtils;
-import util.HttpResponseUtils;
+import util.*;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -13,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import util.HttpStatusCode;
 
 public class HandlerMapping {
     private static String[] staticFiles = {"css", "js", "ico", "html"};
@@ -48,7 +44,7 @@ public class HandlerMapping {
         List<Header> headers = new ArrayList<>();
         headers.add(new Header("Content-Type", "text/"+extension+";charset=utf-8"));
         headers.add(new Header("Content-Length", String.valueOf(body.length)));
-        HttpResponseUtils.responseHeader(dos, HttpStatusCode.OK, headers);
+        HttpResponseUtils.responseHeader(dos, HttpVersion.HTTP_V1, HttpStatusCode.OK, headers);
 
         // send body
         HttpResponseUtils.responseBody(dos, body);
@@ -68,7 +64,7 @@ public class HandlerMapping {
 
         // 대응되는 컨트롤러가 없는 경우
         if(handler == null){
-            HttpResponseUtils.responseHeader(dos, HttpStatusCode.NOT_FOUND, new ArrayList<>());
+            HttpResponseUtils.responseHeader(dos,HttpVersion.HTTP_V1, HttpStatusCode.NOT_FOUND, new ArrayList<>());
             return;
         }
 
@@ -80,7 +76,7 @@ public class HandlerMapping {
                 handler.post(path, br, dos);
                 break;
             default:
-                HttpResponseUtils.responseHeader(dos, HttpStatusCode.NOT_FOUND, new ArrayList<>());
+                HttpResponseUtils.responseHeader(dos, HttpVersion.HTTP_V1,HttpStatusCode.NOT_FOUND, new ArrayList<>());
         }
     }
 }

@@ -16,4 +16,12 @@ public class Header {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Header{" +
+                "key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

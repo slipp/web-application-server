@@ -14,9 +14,9 @@ public class HttpResponseUtils {
 
 
 
-    public static void responseHeader(DataOutputStream dos, HttpStatusCode code, List<Header> headers) {
+    public static void responseHeader(DataOutputStream dos,HttpVersion version, HttpStatusCode code, List<Header> headers) {
         StringBuffer firstLine = new StringBuffer();
-        firstLine.append("HTTP/1.1 ");
+        firstLine.append(version.getVersion());
         firstLine.append(code.getCode());
         firstLine.append(" ");
         firstLine.append(code.getMessage());
