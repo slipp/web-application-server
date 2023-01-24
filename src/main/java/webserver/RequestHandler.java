@@ -34,6 +34,7 @@ public class RequestHandler extends Thread {
             FileReader fr = new FileReader("./webapp" + requestStr);
             BufferedReader fileBr = new BufferedReader(fr);
             String contents = readBufferedReader(fileBr);
+            fileBr.close();
 
             byte[] body = contents.getBytes();
             DataOutputStream dos = new DataOutputStream(out);

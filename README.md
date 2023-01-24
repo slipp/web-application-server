@@ -17,7 +17,7 @@
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
 * 쓰레드로 http 요청을 동시에 처리하는데, chrome에서는 /index.html 요청에 한번더 /favicon.ico 요청을 더하고 있다.
 * 이때 inputStream을 2개의 쓰레드가 공유하게 되는데, http 헤더를 읽을때 bufferedReader를 한쪽 쓰레드에서 close 시 소켓에러가 발생했다.
-* bufferedReader는 쓰레드마다 새로 new로 인스턴스 생성을 하는데도, 다른 쓰레드에 영향을 미치는 것 같다.
+* bufferedReader는 쓰레드마다 새로 new로 인스턴스 생성을 하는데도, close 시에는 bufferedReader 인자로 받은 inputStream을 close하기 때문이다.
 
 ### 요구사항 2 - get 방식으로 회원가입
 * 
