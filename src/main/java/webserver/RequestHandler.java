@@ -1,9 +1,6 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 import org.slf4j.Logger;
@@ -21,15 +18,31 @@ public class RequestHandler extends Thread {
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
-
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            //헤더에서 요청url 추출
+            InputStreamReader iSr = new InputStreamReader(in);
+            BufferedReader br = new BufferedReader(iSr);
+            String requestStr;
+            requestStr = br.readLine();
+            requestStr = getRequestedUrl(requestStr);
+            System.out.println("requested url : " + requestStr);
+            if(requestStr.equals("/favicon.ico") || requestStr == null) {
+                return;
+            }
+
+            //요청된 파일 읽기
+            FileReader fr = new FileReader("./webapp" + requestStr);
+            BufferedReader fileBr = new BufferedReader(fr);
+            String contents = readBufferedReader(fileBr);
+
+            byte[] body = contents.getBytes();
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World3".getBytes();
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -51,5 +64,22 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private String readBufferedReader(BufferedReader br) throws IOException {
+        String content = "";
+        String str;
+        while ((str = br.readLine()) != null) {
+            System.out.println(str);
+            content += str;
+        }
+        br.close();
+        return content;
+    }
+
+    private String getRequestedUrl(String contents) {
+        String []strArr = contents.split(" ");
+        System.out.println(strArr[1]);
+        return strArr[1];
     }
 }
