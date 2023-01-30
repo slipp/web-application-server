@@ -38,7 +38,7 @@ public class RequestHandler extends Thread {
 
             byte[] body = contents.getBytes();
             DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, body.length);
+            response200Header(dos, body.length, requestStr);
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -47,10 +47,13 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String requestUrl) {
         try {
+            String contentType = "text/html";
+            if(requestUrl.indexOf(".css") > 0) contentType = "text/css";
+
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: " + contentType + ";charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -72,7 +75,7 @@ public class RequestHandler extends Thread {
         String str;
         while ((str = br.readLine()) != null) {
             System.out.println(str);
-            content += str;
+            content += ( str + "\n");
         }
         br.close();
         return content;
