@@ -26,7 +26,9 @@
 * 
 
 ### 요구사항 4 - redirect 방식으로 이동
-* 
+* connection 소켓 객체의 DataOutputStream에 302응답을 주려는데 오류..
+* 원인은 위에 InputStream을 close 하면 바로 socket 이 closed 되기 때문에.
+* Stream close는 로직 맨 마지막에 해야된다.
 
 ### 요구사항 5 - cookie
 * 
