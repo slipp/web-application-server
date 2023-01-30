@@ -104,7 +104,7 @@ public class RequestHandler extends Thread {
             }
 
             if(requestMethod.equals("GET")) {
-                response200Header(dos, body.length);
+                response200Header(dos, body.length, requestStr);
                 responseBody(dos, body);
             }
         } catch (IOException e) {
@@ -114,10 +114,14 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String requestUrl) {
         try {
+            String contentType = "text/html";
+            if(requestUrl.indexOf(".css") > 0) contentType = "text/css";
+
+
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: " + contentType + ";charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
