@@ -31,9 +31,15 @@
 * Stream close는 로직 맨 마지막에 해야된다.
 
 ### 요구사항 5 - cookie
+* ~/user/login 요청에 대해 Set-cookie를 받았으면
+* ~/index.html 요청에는 Request Header에 cookie가 set 되지 않음.
+* ~/user/ 내 요청에서만 cookie가 set됨.
+
+### 요구사항 6 - 사용자목록 출력
+* 성능 String << StringBuilder
 * 
 
-### 요구사항 6 - stylesheet 적용
+### 요구사항 7 - stylesheet 적용
 * 
 
 ### heroku 서버에 배포 후
