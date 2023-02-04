@@ -1,0 +1,5 @@
+GET /usr/create?userID=javajigi&password=password&name=Karter HTTP/1.1
+Host: localhost:8080
+Connecttion: keep-alive
+Accept: */*
+
