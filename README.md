@@ -70,11 +70,145 @@ Accept-Encoding: gzip, deflate, br
 Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
 ```
 
+* 2단계 : `/index.html` 파싱
+  * 힌트를 참고하여 Util `InputStreamParser`에 함수 구현
+```java
+public static String RequestParse(String in) {  // 첫째줄 넣기
+    String[] lineToWord = in.split(" ");
+    return Arrays.stream(lineToWord)
+            .filter(s -> s.matches("/.+.html"))      // 정규식으로 파싱
+            .findFirst()
+            .get();
+}
+```
+
+* 3단계 : 요청 URL에 해당하는 파일을 webapp 디렉토리에 읽어 전달
+```java
+String url = InputStreamParser.RequestParse(line);
+DataOutputStream dos = new DataOutputStream(out);
+byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+```
+- 웹페이지를 새로고침해보니 결과는 이렇게 나왔다.
+  - 딱봐도.. 로드가 제대로 이루어지지 않았다. ㅜㅜ
+![](https://user-images.githubusercontent.com/103120173/215966362-0956083f-e62e-4be5-9020-7db562bf767f.png)
+- 그리고 이런 에러 메시지가 콘솔에 출력되었다.
+```text
+Exception in thread "Thread-1" java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.get(Optional.java:143)
+	at util.InputStreamParser.RequestParse(InputStreamParser.java:11)
+	at webserver.RequestHandler.run(RequestHandler.java:39)
+
+...
+
+Exception in thread "Thread-7" java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.get(Optional.java:143)
+	at util.InputStreamParser.RequestParse(InputStreamParser.java:11)
+	at webserver.RequestHandler.run(RequestHandler.java:39)
+```
+- 관련해서 검색을 해보니 이런 에러가 나는 것은 너무나 당연했다. [참고링크](https://bryceyangs.github.io/various/2021/09/16/Book-%EC%9E%90%EB%B0%94-%EC%9B%B9-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D-Next-Step/)
+  - 이를 참고해서 코드를 다시 수정했다...
+
+```java
+// 1. 파싱해오는 정규식 수정
+public static String RequestParse(String in) {
+    String[] lineToWord = in.split(" ");
+    return Arrays.stream(lineToWord)
+    .filter(s -> s.matches("/.+[/]?.[a-z]+"))
+    .findFirst()
+    .get();
+}
+```
+```java
+System.out.println("TEST");
+BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+String line = br.readLine();
+
+// 전체출력
+while (!"".equals(line)) {
+    System.out.println(line);
+    if (line==null) {return;}
+
+    // index.html 파싱
+    String url = InputStreamParser.RequestParse(line);
+
+    System.out.println("parse result : " + url);    // 파싱이
+
+    DataOutputStream dos = new DataOutputStream(out);
+    byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+//            byte[] body = "Hello World".getBytes();
+    response200Header(dos, body.length);
+    responseBody(dos, body);
+    line = br.readLine();
+}
+
+// 여기까지 요구사항1
+```
+
+* 결과는 비슷했다. 요청 파일명은 파싱은 제대로 하는데, 아마 요청하는 속도와 파싱하는 속도가 달라서 그런 것일까?
+  * 이리저리 고심하다 포기하고 뒷쪽 요구사항을 보니 뒤쪽에 css, js 관련 요구사항이 있다는 것을 뒤늦게 발견했다. (...)
+
 ### 요구사항 2 - get 방식으로 회원가입
-* 
+
+```java
+String url = InputStreamParser.RequestParse(line);  // index.html 파싱
+
+Map<String, String> map = HttpRequestUtils.parseQueryString(url);
+
+User user = new User(map.get("userId"),
+        map.get("password"),
+        map.get("name"),
+        map.get("email"));
+
+map.values().stream().forEach(e -> log.debug(e));   // 요소 log로 찍어봤다.
+```
+
+- 근데 결과가 좀 이상하게 나와서 파악해보니 url을 &와 =로만 구분하니 앞에있는 url까지 나와서 아예 파싱할 때 `?`로 구분 후, 파싱해야겠다고 생각했다.
+
+```java
+Map<String, String> map = HttpRequestUtils.parseQueryString(url.split("\\?")[1]);
+
+                User user = new User(map.get("userId"),
+                        map.get("password"),
+                        map.get("name"),
+                        map.get("email"));
+
+                log.debug(user.getUserId() + user.getName() + user.getPassword() + user.getEmail());
+```
+
+```java
+16:28:02.650 [ERROR] [Thread-1] [webserver.RequestHandler] - ./webapp/user/create?userId=user&password=1234&name=%EC%9D%B4%EC%83%88%ED%9E%98&email=saeilee.vxv%40gmail.com
+```
 
 ### 요구사항 3 - post 방식으로 회원가입
-* 
+* `user/form.html` 파일에서 다음을 수정했다.
+```html
+<form name="question" method="post" action="/user/create">  // method get -> post
+              <div class="form-group">
+                  <label for="userId">사용자 아이디</label>
+                  <input class="form-control" id="userId" name="userId" placeholder="User ID">
+              </div>
+```
+
+- 다음과 같이 코드 작성함
+```java
+Map<String, String> httpHeader = new HashMap<>();
+
+while (!line.equals("")) {
+    line = br.readLine();
+    String[] split = line.split(":");
+    try {
+        httpHeader.put(split[0].trim(), split[1].trim());
+    } catch (ArrayIndexOutOfBoundsException e) {
+        System.out.println(e.getMessage());
+    }
+}
+
+String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+
+User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+```
 
 ### 요구사항 4 - redirect 방식으로 이동
 * 
