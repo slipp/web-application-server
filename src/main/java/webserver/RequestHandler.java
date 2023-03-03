@@ -33,9 +33,16 @@ public class RequestHandler extends Thread {
             String line = br.readLine();
             int i = line.indexOf("?");
             String url = InputStreamParser.urlParse(line.substring(0, i));  // index.html 파싱
+            Map<String, String> httpHeader = new HashMap<>();
 
             while (!line.equals("")) {
                 line = br.readLine();
+                String[] split = line.split(":");
+                try {
+                    httpHeader.put(split[0].trim(), split[1].trim());
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.out.println(e.getMessage());
+                }
             }
 
             String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
