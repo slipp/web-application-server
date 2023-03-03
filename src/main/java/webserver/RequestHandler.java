@@ -1,13 +1,17 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
+import util.IOUtils;
+import util.InputStreamParser;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -27,7 +31,17 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
             String line = br.readLine();
+            int i = line.indexOf("?");
             String url = InputStreamParser.urlParse(line.substring(0, i));  // index.html 파싱
+
+            while (!line.equals("")) {
+                line = br.readLine();
+            }
+
+            String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+            Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+
+            User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
