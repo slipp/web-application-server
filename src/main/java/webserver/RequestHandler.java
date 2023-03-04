@@ -70,8 +70,7 @@ public class RequestHandler extends Thread {
                         // 로그인 성공
                         System.out.println("success");
                         body = Files.readAllBytes(new File("./webapp/index.html").toPath());
-                        response200Header(dos, body.length);
-                        dos.writeBytes("Set-Cookie: logined=true\r\n");
+                        response200HeaderSuccessLogin(dos);
                     } else {
                         // 로그인 실패
                         System.out.println("failed");
@@ -102,6 +101,16 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
             dos.writeBytes("Location: "+ location + "\r\n");
             dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void responss302HeaderSuccessLogin(DataOutputStream dos) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 OK \r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Set-Cookie: logined=true\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }

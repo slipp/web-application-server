@@ -244,7 +244,28 @@ private void response302Header(DataOutputStream dos) {
 ```
 
 ### 요구사항 5 - cookie
-* 
+* 로그인 하기
+```java
+case "/user/login" -> {     // 로그인
+    String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+    Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+    User user = DataBase.findUserById(map.get("userId"));
+
+    // 아이디가 없거나 && 비밀번호가 다른 경우
+    if (user != null && Objects.equals(user.getPassword(), map.get("password"))) {
+        // 로그인 성공
+        System.out.println("success");
+        body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+        response200Header(dos, body.length);
+        dos.writeBytes("Set-Cookie: logined=true\r\n");
+    } else {
+        // 로그인 실패
+        System.out.println("failed");
+        body = Files.readAllBytes(new File("./webapp/user/login_failed.html").toPath());
+        response302Header(dos);
+    }
+}
+```
 
 ### 요구사항 6 - stylesheet 적용
 * 
