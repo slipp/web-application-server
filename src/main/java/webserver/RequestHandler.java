@@ -70,16 +70,16 @@ public class RequestHandler extends Thread {
                         // 로그인 성공
                         System.out.println("success");
                         body = Files.readAllBytes(new File("./webapp/index.html").toPath());
-                        response200HeaderSuccessLogin(dos);
+                        response302HeaderSuccessLogin(dos);
                     } else {
                         // 로그인 실패
                         System.out.println("failed");
                         body = Files.readAllBytes(new File("./webapp/user/login_failed.html").toPath());
-                        response302Header(dos);
+                        response200Header(dos, body.length);
                     }
                 }
                 case "/user/list" -> {      // 로그인한 상태
-
+                    
                 }
                 // 모든 경우
                 default -> {
@@ -106,10 +106,11 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void responss302HeaderSuccessLogin(DataOutputStream dos) {
+    private void response302HeaderSuccessLogin(DataOutputStream dos) {
         try {
-            dos.writeBytes("HTTP/1.1 302 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            String location = "/index.html";
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: "+ location + "\r\n");
             dos.writeBytes("Set-Cookie: logined=true\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

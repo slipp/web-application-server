@@ -266,8 +266,12 @@ case "/user/login" -> {     // 로그인
     }
 }
 ```
+- 200 으로하니 오류가 생겨서 (다음 url이 `user/user/list`가 됨)
+- 302로 고쳐서 다시 했다.
 
-### 요구사항 6 - stylesheet 적용
+![img_1.png](readme_assets/img_1.png)
+
+### 요구사항 6 - 사용자 목록 출력
 * 
 
 ### heroku 서버에 배포 후
