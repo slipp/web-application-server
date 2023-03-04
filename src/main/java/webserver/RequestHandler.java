@@ -2,7 +2,9 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,8 +60,8 @@ public class RequestHandler extends Thread {
                     DataBase.addUser(new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email")));
 
                     // index로 이동
-                    body = Files.readAllBytes(new File("./webapp/index.html").toPath());
-                    response302Header(dos);
+                    dos = new DataOutputStream(out);
+                    response302Header(dos, "/index.html");
                 }
                 case "/user/login" -> {     // 로그인
                     String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
@@ -68,23 +70,63 @@ public class RequestHandler extends Thread {
 
                     if (user != null && Objects.equals(user.getPassword(), map.get("password"))) {
                         // 로그인 성공
-                        System.out.println("success");
-                        body = Files.readAllBytes(new File("./webapp/index.html").toPath());
-                        response302HeaderSuccessLogin(dos);
+                        dos = new DataOutputStream(out);
+                        response302HeaderWithCookie(dos, "/index.html", "logined=true");
                     } else {
                         // 로그인 실패
-                        System.out.println("failed");
+                        dos = new DataOutputStream(out);
                         body = Files.readAllBytes(new File("./webapp/user/login_failed.html").toPath());
-                        response200Header(dos, body.length);
+                        response302HeaderWithCookie(dos, "/user/login_failed.html", "logined=false");
                     }
                 }
                 case "/user/list" -> {      // 로그인한 상태
-                    
+                    try {
+                        Map<String, String> cookie = HttpRequestUtils.parseCookies(httpHeader.get("Cookie"));
+                        if (Boolean.parseBoolean(cookie.get("logined"))) {
+                            // 로그인 한 상태
+                            int idx = 3;
+
+                            Collection<User> userList = DataBase.findAll();
+
+                            StringBuilder sb = new StringBuilder();
+                            for(User user : userList) {
+                                sb.append("<tr>");
+                                sb.append("<th scope=\"row\">"+idx+"</th><td>"+user.getUserId()+"</td> <td>"+user.getName()+"</td> <td>"+user.getEmail()+"</td><td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td></tr>");
+                                idx++;
+                            }
+
+                            String fileData = new String(Files.readAllBytes(new File("./webapp" + url + ".html").toPath()) );
+                            fileData = fileData.replace("%user_list%", URLDecoder.decode(sb.toString(), "UTF-8"));
+
+                            body = fileData.getBytes();
+                            dos = new DataOutputStream(out);
+
+                            if (httpHeader.get("Accept").contains("text/css")) {
+                                response200HeaderWithCss(dos, body.length);
+                            } else {
+                                response200Header(dos, body.length);
+                            }
+                        } else {
+                            dos = new DataOutputStream(out);
+                            response302Header(dos, "/index.html");
+                        }
+                    } catch (NullPointerException e) {
+                        // 로그인 안된 상태
+                        body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+                        dos = new DataOutputStream(out);
+                        response302Header(dos, "/index.html");
+                    }
                 }
                 // 모든 경우
                 default -> {
                     body = Files.readAllBytes(new File("./webapp" + url).toPath());
-                    response200Header(dos, body.length);
+                    dos = new DataOutputStream(out);
+
+                    if (httpHeader.get("Accept").contains("text/css")) {
+                        response200HeaderWithCss(dos, body.length);
+                    } else {
+                        response200Header(dos, body.length);
+                    }
                 }
             }
 
@@ -95,9 +137,19 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response302Header(DataOutputStream dos) {
+    private void response200HeaderWithCss(DataOutputStream dos, int lengthOfBodyContent) {
         try {
-            String location = "/index.html";
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, String location) {
+        try {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
             dos.writeBytes("Location: "+ location + "\r\n");
             dos.writeBytes("\r\n");
@@ -106,12 +158,12 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response302HeaderSuccessLogin(DataOutputStream dos) {
+    private void response302HeaderWithCookie(DataOutputStream dos, String location, String cookie) {
         try {
-            String location = "/index.html";
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
             dos.writeBytes("Location: "+ location + "\r\n");
-            dos.writeBytes("Set-Cookie: logined=true\r\n");
+            dos.writeBytes("Set-Cookie: "+cookie+"\r\n");
+            dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }

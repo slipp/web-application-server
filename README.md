@@ -272,7 +272,71 @@ case "/user/login" -> {     // 로그인
 ![img_1.png](readme_assets/img_1.png)
 
 ### 요구사항 6 - 사용자 목록 출력
-* 
+* 제일 어려웠던 내용...
+* html문서를 먼저 확인 한 후, 데이터를 넣을 곳에 삽입할 수 있도록 StringBuilder를 만들어 주었다.
+* 보낼 body에 내요을 가져다 껴넣고 다시 body를 읽혀주어야 했다.
+
+```java
+case "/user/list" -> {      // 로그인한 상태
+  try {
+      Map<String, String> cookie = HttpRequestUtils.parseCookies(httpHeader.get("Cookie"));
+      if (Boolean.parseBoolean(cookie.get("logined"))) {
+          // 로그인 한 상태
+          int idx = 3;
+
+          Collection<User> userList = DataBase.findAll();
+
+          StringBuilder sb = new StringBuilder();
+          for(User user : userList) {
+              sb.append("<tr>");
+              sb.append("<th scope=\"row\">"+idx+"</th><td>"+user.getUserId()+"</td> <td>"+user.getName()+"</td> <td>"+user.getEmail()+"</td><td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td></tr>");
+              idx++;
+          }
+
+          String fileData = new String(Files.readAllBytes(new File("./webapp" + url + ".html").toPath()) );
+          fileData = fileData.replace("%user_list%", URLDecoder.decode(sb.toString(), "UTF-8"));
+
+          body = fileData.getBytes();
+          dos = new DataOutputStream(out);
+
+          if (httpHeader.get("Accept").contains("text/css")) {
+              response200HeaderWithCss(dos, body.length);
+          } else {
+              response200Header(dos, body.length);
+          }
+      } else {
+          dos = new DataOutputStream(out);
+          response302Header(dos, "/index.html");
+      }
+  } catch (NullPointerException e) {
+      // 로그인 안된 상태
+      body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+      dos = new DataOutputStream(out);
+      response302Header(dos, "/index.html");
+  }
+```
+
+### 요구사항 7. CSS 지원하기
+```java
+if (httpHeader.get("Accept").contains("text/css")) {
+    response200HeaderWithCss(dos, body.length);
+} else {
+    response200Header(dos, body.length);
+}
+```
+```java
+private void response200HeaderWithCss(DataOutputStream dos, int lengthOfBodyContent) {
+    try {
+        dos.writeBytes("HTTP/1.1 200 OK \r\n");
+        dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n"); // 이부분이 포인트였다..!
+        dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+        dos.writeBytes("\r\n");
+    } catch (IOException e) {
+        log.error(e.getMessage());
+    }
+}
+```
+- 사실 `text/css`가 없을 때가 있나? 그냥 else 부분 지워도 될 것 같다.
 
 ### heroku 서버에 배포 후
 * 
