@@ -211,7 +211,37 @@ User user = new User(map.get("userId"), map.get("password"), map.get("name"), ma
 ```
 
 ### 요구사항 4 - redirect 방식으로 이동
-* 
+* `response302Header()` 메소드를 만들었다.
+* url 이 `/user/create` 이면 호출되도록 했다.
+
+```java
+byte[] body = new byte[0];
+
+if (url.equals("/user/create")) {
+    String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+    Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+    User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+
+    body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+    response302Header(dos);
+} else {
+    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+    response200Header(dos, body.length);
+}
+```
+
+```java
+private void response302Header(DataOutputStream dos) {
+    try {
+        String location = "/index.html";
+        dos.writeBytes("HTTP/1.1 302 Found \r\n");
+        dos.writeBytes("Location: "+ location + "\r\n");
+        dos.writeBytes("\r\n");
+    } catch (IOException e) {
+        log.error(e.getMessage());
+    }
+}
+```
 
 ### 요구사항 5 - cookie
 * 

@@ -5,7 +5,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +33,8 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
             String line = br.readLine();
-            int i = line.indexOf("?");
-            String url = InputStreamParser.urlParse(line.substring(0, i));  // index.html 파싱
+            String url = InputStreamParser.urlParse(line);  // index.html 파싱
+            System.out.println(url);
             Map<String, String> httpHeader = new HashMap<>();
 
             while (!line.equals("")) {
@@ -45,19 +47,61 @@ public class RequestHandler extends Thread {
                 }
             }
 
-            String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
-            Map<String, String> map = HttpRequestUtils.parseQueryString(data);
-
-            User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
-
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-//            response200Header(dos, body.length);
+            byte[] body = new byte[0];
+
+
+            switch (url) {
+                case "/user/create" -> {    // 회원가입
+                    String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+                    Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+                    DataBase.addUser(new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email")));
+
+                    // index로 이동
+                    body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+                    response302Header(dos);
+                }
+                case "/user/login" -> {     // 로그인
+                    String data = IOUtils.readData(br, Integer.parseInt(httpHeader.get("Content-Length")));
+                    Map<String, String> map = HttpRequestUtils.parseQueryString(data);
+                    User user = DataBase.findUserById(map.get("userId"));
+
+                    if (user != null && Objects.equals(user.getPassword(), map.get("password"))) {
+                        // 로그인 성공
+                        System.out.println("success");
+                        body = Files.readAllBytes(new File("./webapp/index.html").toPath());
+                        response200Header(dos, body.length);
+                        dos.writeBytes("Set-Cookie: logined=true\r\n");
+                    } else {
+                        // 로그인 실패
+                        System.out.println("failed");
+                        body = Files.readAllBytes(new File("./webapp/user/login_failed.html").toPath());
+                        response302Header(dos);
+                    }
+                }
+                case "/user/list" -> {      // 로그인한 상태
+
+                }
+                // 모든 경우
+                default -> {
+                    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                    response200Header(dos, body.length);
+                }
+            }
+
             responseBody(dos, body);
 
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void response302Header(DataOutputStream dos) {
+        try {
+            String location = "/index.html";
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: "+ location + "\r\n");
+            dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }

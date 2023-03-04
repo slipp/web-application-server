@@ -10,7 +10,6 @@ public class InputStreamParser {
                 .filter(s -> s.matches("/.+"))
                 .findFirst()
                 .get();
-//        return lineToWord[1];
     }
 
 }
