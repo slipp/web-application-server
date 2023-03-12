@@ -1,0 +1,4 @@
+HTTP/1.1 302 Found 
+Location: /index.html
+Set-Cookie: logined=true
+
