@@ -1,9 +1,6 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 import org.slf4j.Logger;
@@ -24,6 +21,7 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            readHeader(in);
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello World".getBytes();
             response200Header(dos, body.length);
@@ -50,6 +48,27 @@ public class RequestHandler extends Thread {
             dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    public void readHeader(InputStream is) throws IOException {
+        InputStreamReader in = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(in);
+        String line = br.readLine();
+        // url 자르는 용도
+        String[] tokens = line.split(" ");
+//        에러가 발생한 코드. 무한 루프에 빠졌다. 왜 인지 알아보자. 아마 line=="" 상태인데 line == null
+//        일 때만 탈출할 수 있어서 그런 것 같다.
+//        while((line = br.readLine())!=null ){
+//            log.info("{}",line);
+//        }
+        while(!"".equals(line)){
+            if (line == null) {
+                return;
+            }
+
+            log.info("{}",line);
+            line = br.readLine();
         }
     }
 }
