@@ -94,8 +94,7 @@
    index.html이 로드될 때 해당 요청들이 생기는 것이다.
    
 7. 해당 RequestHandler 클래스는 Thead를 확장(상속)한 것이다.  
-   그렇기에 Thread 함수에 대해 알 필요가 있다.
-   ---
+   그렇기에 Thread 함수에 대해 알 필요가 있다.s
    <details>
      <summary>Thread란?</summary>
      <div markdown="1">
