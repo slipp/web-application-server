@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+<<<<<<< HEAD
         	
         	InputStreamReader ir = new InputStreamReader(in);
             BufferedReader br = new BufferedReader(ir);
@@ -33,13 +35,33 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" ");
             log.info("url {}",tokens[1]);
             
+=======
+            InputStreamReader is = new InputStreamReader(in);
+            BufferedReader br = new BufferedReader(is);
+            String line = br.readLine();
+            // url 자르는 용도
+            String[] tokens = line.split(" ");
+            String url = tokens[1];
+            log.info("URL: {}",url);
+
+            if (line == null) {
+                return;
+            }
+>>>>>>> c07f43ab57f2259794e5c0d2a8b39fe0bbae9d36
             while(!"".equals(line)){
                 log.info("{}",line);
                 line = br.readLine();
             }
+<<<<<<< HEAD
             
+=======
+            log.info("    ");
+
+>>>>>>> c07f43ab57f2259794e5c0d2a8b39fe0bbae9d36
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+            byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+            log.info("Path: {}",new File("./webapp" + url).toPath());
+//            byte[] body = "Hello Worsld".getBytes();
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
@@ -67,4 +89,8 @@ public class RequestHandler extends Thread {
         }
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c07f43ab57f2259794e5c0d2a8b39fe0bbae9d36
 }
