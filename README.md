@@ -15,10 +15,11 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
+
+---
 1. 요청을 하나씩 읽어야 한다. 요청은 다음과 같이 들어온다고 한다.
    
-    ```http request
-   
+     ``` http request
     GET /index.html HTTP/1.1
     Host: localhost:8080
     Connection: keep-alive
@@ -57,18 +58,12 @@
         String line = br.readLine();
         // url 자르는 용도
         String[] tokens = line.split(" ");
-   //        에러가 발생한 코드. 무한 루프에 빠졌다. 왜 인지 알아보자. 아마 line=="" 상태인데 line == null
-   //        일 때만 탈출할 수 있어서 그런 것 같다.
-   //        while((line = br.readLine())!=null ){
-   //            log.info("{}",line);
-   //        }
-   while(!"".equals(line)){
-   if (line == null) {
-   return;
-   }
-
-            log.info("{}",line);
-            line = br.readLine();
+        while(!"".equals(line)){
+            if (line == null) {
+                return;
+            }
+           log.info("{}",line);
+           line = br.readLine();
         }
     }
    ```

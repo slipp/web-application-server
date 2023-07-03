@@ -22,10 +22,14 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            InputStreamReader is = new InputStreamReader(in);
-            BufferedReader br = new BufferedReader(is);
-            String line = br.readLine();
 
+        	InputStreamReader ir = new InputStreamReader(in);
+            BufferedReader br = new BufferedReader(ir);
+            String line = br.readLine();
+            if (line == null) {
+                return;
+            }
+            
             // 요청 url 을 잘라 파일 경로르 추춣한다.
             String[] tokens = line.split(" ");
             String url = tokens[1];
@@ -41,7 +45,6 @@ public class RequestHandler extends Thread {
             }
             log.info("    ");
 
-            //
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             log.info("Path: {}",new File("./webapp" + url).toPath());
@@ -72,6 +75,5 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
-
 
 }
