@@ -88,7 +88,7 @@
    responseBody(dos, body);
    ```
    그러면 이제 아래와 같이 잘 나온다.
-  ![img.png](img.png)
+  ![img.png](content/img.png)
 6. 위에서 /index.html 을 요청을 하면 css, js 등 여러 파일도 요청이 날라오게 된다.  
    이것은 index.html 안에 해당 파일을 읽어오는 href 와 같은 태그에 존재하기에  
    index.html이 로드될 때 해당 요청들이 생기는 것이다.
@@ -108,7 +108,37 @@
    </details>
 8. RequestHandler 클래스에서 응답은  
    DataOutputStream dos = new DataOutputStream(out); 을 통해서 나간다.  
-   그러므로 DataOutputStream 에 대해 알아보자.  
+   그러므로 DataOutputStream 에 대해 알아보자.
+* DataOutputStream 은 출력 스트림으로, 파일이나 콘솔에 데이터를 저장하거나 출력하는 역할을 한다.  
+   여기 코드에서는 응답인 OutputStream out 에 데이터를 저장하는 일을 한다.  
+   ```java
+   DataOutputStream dos = new DataOutputStream(out);
+   ```
+* 저장을 한 뒤 flush() 를 사용하는데 이것은 남아있는 데이터를 보내는 것 같다.  
+   다음 실행때 남아있는게 없기 위해 안전을 위해 써주는게 좋지만 안쓴다고 에러가 생기진 않더라.
+9. ServerSocket 이란?  
+   갑자기 ServerSocket 이 어디서 튀어나왔냐면 WebServer에 있는 클래스이다.  
+   ```java
+   try (ServerSocket listenSocket = new ServerSocket(port)) {
+            log.info("Web Application Server started {} port.", port);
+
+            // 클라이언트가 연결될때까지 대기한다.
+            Socket connection;
+            while ((connection = listenSocket.accept()) != null) {
+                RequestHandler requestHandler = new RequestHandler(connection);
+                requestHandler.start();
+            }
+   }
+   ```
+* 소켓 연결은 네트워크로 연결된 두 대의 호스트간 통신을 위한 양 끝이라고 생각하면 된다.  
+   즉, Connection을 개설하기 위한 도구이다.
+* 클라이언트인 내가 소켓을 가지고 서버에 커넥션을 연결한다.  
+   서버는 미리 클라이언트를 기다리 있던 상태였기에, 클라이언트가 요청함으로서 서버는 소켓을 생성한다.  
+   그럼 이제 소켓이 한 쌍이니 연결이 가능해진다.
+* ServerSocket 은 자바에서 서버 프로그램을 개발할 때 사용되는 클래스이다.  
+   즉, 위에서 말한 소켓을 만드는 클래스인 것이다.  
+* 포트를 통해 연결이 오기를 기다렸다가, 요청이 들어오면 클라이언트와 연결을 맺고,  
+   해당 클라이언트와 통신하는 새 소켓을 생성하는 일을 한다.
    
          
 

@@ -25,11 +25,13 @@ public class RequestHandler extends Thread {
             InputStreamReader is = new InputStreamReader(in);
             BufferedReader br = new BufferedReader(is);
             String line = br.readLine();
-            // url 자르는 용도
+
+            // 요청 url 을 잘라 파일 경로르 추춣한다.
             String[] tokens = line.split(" ");
             String url = tokens[1];
             log.info("URL: {}",url);
 
+            // 만약 요청이 null 이면 종료
             if (line == null) {
                 return;
             }
@@ -39,10 +41,11 @@ public class RequestHandler extends Thread {
             }
             log.info("    ");
 
+            //
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             log.info("Path: {}",new File("./webapp" + url).toPath());
-//            byte[] body = "Hello Worsld".getBytes();
+
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
