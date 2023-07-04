@@ -141,8 +141,31 @@
 
 ---
 
-1. 
+1. get 방식으로 회원가입 요청이 들어오기에 url에서 파리미터를 분리해야한다.  
+   아래와 같은 방법으로 구분했다.  
 
+   ```java
+   // 요청 url 을 잘라 파일 경로르 추춣한다.
+   String[] tokens = line.split(" ");
+   String url = tokens[1];
+   log.info("URL: {}",url);
+   String[] url_suffix = url.split("\\?");
+   String[] param = url_suffix[1].split("&");
+   
+   for (String params: param){
+        log.info("param : {}", params);
+   }
+   ```
+
+   ```
+   위와 같이 작성하니 로그에 잘 찍혀 나온다.  
+   param : userId=test01  
+   param : password=test01  
+   param : name=  
+   param : email=
+   ```
+2. 이제 이렇게 가져온 값을 User객체에 넣어야 한다.
+      
 ### 요구사항 3 - post 방식으로 회원가입
 * 
 

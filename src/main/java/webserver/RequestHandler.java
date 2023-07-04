@@ -3,6 +3,7 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,19 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" ");
             String url = tokens[1];
             log.info("URL: {}",url);
+            String[] url_suffix = url.split("\\?");
+            String[] param = url_suffix[1].split("&");
+
+            ArrayList<Object> newParam = new ArrayList<>();
+
+            for (String s : param) {
+                log.info("param : {}", s);
+                newParam.add(s.split("="));
+            }
 
             // 만약 요청이 null 이면 종료
-            if (line == null) {
-                return;
-            }
+            if (line == null) return;
+            
             while(!"".equals(line)){
                 log.info("{}",line);
                 line = br.readLine();
