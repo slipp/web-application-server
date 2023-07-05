@@ -47,7 +47,7 @@ public class RequestHandler extends Thread {
 
             // 만약 요청이 null 이면 종료
             if (line == null) return;
-            
+
             while(!"".equals(line)){
                 log.info("{}",line);
                 line = br.readLine();
