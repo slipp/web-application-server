@@ -45,6 +45,10 @@ public class RequestHandler extends Thread {
                 newParam.add(s.split("="));
             }
 
+            for (int i = 0; i < newParam.size(); i++) {
+                log.info("new param index = {}, value = {}",i, newParam.get(i));
+            }
+
             // 만약 요청이 null 이면 종료
             if (line == null) return;
 

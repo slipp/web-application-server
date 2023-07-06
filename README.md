@@ -155,18 +155,27 @@
    for (String params: param){
         log.info("param : {}", params);
    }
+   ```  
+   
+   위와 같이 작성하니 로그에 잘 찍혀 나온다.
    ```
-
-   ```
-   위와 같이 작성하니 로그에 잘 찍혀 나온다.  
    param : userId=test01  
    param : password=test01  
    param : name=  
    param : email=
    ```
-2. 이제 이렇게 가져온 값을 User객체에 넣어야 한다.
-
-   수정 중..
+2. 이제 이렇게 가져온 값을 User객체에 넣어야 한다.  
+   하지만 아직까지도 String s = "userId=test01" 이렇게 값이 들어있다. 
+   이것도 '=' 을 기준으로 나눠야한다.
+   > 추가 : InputStream 과 OutPutStream 이 헷깔릴 때가 있다.  
+   > 둘 다 File 객체를 사용할 때도 있기에 어떨 때 어떤 방법을 사용해야 하는지 아직 정확한 기준이 서지 않았기 때문이다.  
+   > 이제 고민하지 말고 아래 기준으로 구분을 하자.  
+   > * InputStream 은 내가 사용하기 위해 데이터를 받는 것이다.  
+   > * 반대로 OutputStream 은 내가 보낼 데이터를 넣어놓는 것이다.  
+   > 
+   > 위와 같은 기준을 가지고 Stream을 사용하면 된다.
+   
+   
       
 ### 요구사항 3 - post 방식으로 회원가입
 * 
