@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,12 @@ public class RequestHandler extends Thread {
                     }
                 }
                 log.info("map : {}", map);
+                String userId = (String) map.get("userId");
+                String password = (String) map.get("password");
+                String name = (String) map.get("name");
+                String email = (String) map.get("email");
+
+                User user = new User(userId, password, name, email);
             }
 
             // 만약 요청이 null 이면 종료
@@ -69,7 +76,10 @@ public class RequestHandler extends Thread {
                 line = br.readLine();
             }
 
-            log.info("    ");
+            line = br.readLine();
+            log.info("{}",line);
+            line = br.readLine();
+            log.info("{}",line);
 
             // OutStream을 통해 응답 출력
             DataOutputStream dos = new DataOutputStream(out);

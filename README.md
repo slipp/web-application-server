@@ -211,9 +211,49 @@
    >map : {password=test01, name=, userId=test01, email=}
 7. 위 과정을 더 확실하게 확인하기 위해 단위테스트를 진행하기로 결심했다!!  
    내 생에 첫! 단위테스트이다ㅎㅎ   
+   RequestHandler 를 테스트 하기 위해 RequestHandlerTest 테스트 클래스를 생성하였다.  
+   그리고 테스트에서 assertJ 를 사용하기 위해 pom.xml 에 의존성을 추가해줬다.  
+   ``` xml
+   <dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.24.2</version>
+			<scope>test</scope>
+   </dependency>
+   ```  
+   그리고 아래와 같이 코드를 작성해 테스트를 진행했다.  
+   ```java
+   String queryString = "userId=test01&password=test01&name=&email=";
+        String[] param = queryString.split("&");
+
+        Map<String, Object> map = new HashMap<>();
+        for (String s : param) {
+            String[] tempList = s.split("=");
+            if (tempList.length > 1) {
+                map.put(tempList[0], tempList[1]);
+            }else{
+                map.put(tempList[0], "");
+            }
+        }
+
+        assertThat(map.get("userId")).isEqualTo("test01");
+   ```  
+   * 처음으로 단위테스트를 진행해보니 단위테스트의 장점을 알 수 있을 것 같았다.  
+      우선, 테스트를 하는데 쓸데없는 요청을 보낼 필요가 없었다.   
+      테스트 예시를 넣어놓고, 위에서는 String queryString, 테스트만 실행시키면 되니 너무 간단했다.  
+   * 만약 다른 클래스에 존재하는 메소드를 사용하려면 어떻게 해야되는지 궁금해졌다.  
+      일단 내가 저번에 들었던 수업에서는 객체를 생성해서 메소드를 사용하는 것 같다.  
+   * 근데 그러면 객체를 만들 때 이전 테스트에서의 영향이 있지 않을까 생각이 들기도 한다.  
+      이 문제는 테스트를 돌리기 전, 돌린 후 사용되는 메소드가 있었던 것으로 기억한다. 그것을 사용하면 될 것 같다.  
+8. 이제 단위 테스트도 하였고, 데이터도 map안에 깔끔하게 잘 넣었다.  
+   그러면 이제 본론인 User 객체를 생성해보자!  
+9. 오 쉿. 파싱은 util.HttpRequestUtils 클래스의 parseQueryString()을 사용해서 하는 것이였다....  
+   몰라 내가 했으니 내껄로 할래. 이거 너무 복잡해..  
+
    
 ### 요구사항 3 - post 방식으로 회원가입
-* 
+* 이제 http method를 POST 변경해서 회원가입을 진행해보자.  
+   
 
 ### 요구사항 4 - redirect 방식으로 이동
 * 

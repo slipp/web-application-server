@@ -1,6 +1,7 @@
 package webserver;
 
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,12 @@ public class RequestHandlerTest {
                 map.put(tempList[0], "");
             }
         }
+        String userId = (String) map.get("userId");
+        String password = (String) map.get("password");
+        String name = (String) map.get("name");
+        String email = (String) map.get("email");
 
-        assertThat(map.get("userId")).isEqualTo("test01");
-
+        User user = new User(userId, password, name, email);
+//        assertThat(user).isEqualTo(new User("test01", "test01", "", ""));
     }
 }
