@@ -35,18 +35,24 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" ");
             String url = tokens[1];
             log.info("URL: {}",url);
+
+            // url 에서 파라미터들을 분리한다. ?name=hi&age=14 이렇게 되어있기에 파라미터는 index = 1에 저장된다.
             String[] url_suffix = url.split("\\?");
-            String[] param = url_suffix[1].split("&");
 
-            ArrayList<Object> newParam = new ArrayList<>();
+            // 파라미터가 있을 때의 조건
+            if (url_suffix.length > 1) {
+                String[] param = url_suffix[1].split("&");
 
-            for (String s : param) {
-                log.info("param : {}", s);
-                newParam.add(s.split("="));
-            }
+                ArrayList<Object> newParam = new ArrayList<>();
 
-            for (int i = 0; i < newParam.size(); i++) {
-                log.info("new param index = {}, value = {}",i, newParam.get(i));
+                for (String s : param) {
+                    log.info("param : {}", s);
+                    newParam.add(s.split("="));
+                }
+
+                for (int i = 0; i < newParam.size(); i++) {
+                    log.info("newParam : {}", newParam.get(i));
+                }
             }
 
             // 만약 요청이 null 이면 종료
@@ -56,8 +62,10 @@ public class RequestHandler extends Thread {
                 log.info("{}",line);
                 line = br.readLine();
             }
+
             log.info("    ");
 
+            // OutStream을 통해 응답 출력
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             log.info("Path: {}",new File("./webapp" + url).toPath());
