@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +45,20 @@ public class RequestHandler extends Thread {
             if (url_suffix.length > 1) {
                 String[] param = url_suffix[1].split("&");
 
-                ArrayList<Object> newParam = new ArrayList<>();
-
+                // 이제 파라미터들이 ['name=hi','age=14'] 이렇게 들어가 있다.
+                // 이제 이것을 '=' 으로 나눠서 termpList 에 넣자
+                // 그리고 이 데이터를 다시 Map 데이터에 세팅하자.
+                Map<String, Object> map = new HashMap<>();
                 for (String s : param) {
                     log.info("param : {}", s);
-                    newParam.add(s.split("="));
+                    String[] tempList = s.split("=");
+                    if (tempList.length > 1) {
+                        map.put(tempList[0], tempList[1]);
+                    }else{
+                        map.put(tempList[0], "");
+                    }
                 }
-
-                for (int i = 0; i < newParam.size(); i++) {
-                    log.info("newParam : {}", newParam.get(i));
-                }
+                log.info("map : {}", map);
             }
 
             // 만약 요청이 null 이면 종료

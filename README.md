@@ -174,8 +174,44 @@
    > * 반대로 OutputStream 은 내가 보낼 데이터를 넣어놓는 것이다.  
    > 
    > 위와 같은 기준을 가지고 Stream을 사용하면 된다.
+3. 나눈 데이터들을 한번 더  '&' 으로 나눴다. 그리고 나눠서 arrayList에 넣었다.  
+   그렇게 해서 아래와 같은 모습으로 데이터를 넣을 수 있었다.  
+   ```
+   ArrayList<Object> newParam = [[userId, test01], [password, test01],[name],[email]]
+   ```
+4. 이제 이렇게 나눈 데이터를 User객체에 넣는 일을 해야한다.  
+   User 클래스는 아래와 같이 생겼다.  
+   ```java
+   public User(String userId, String password, String name, String email) {
+        this.userId = userId;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+    }
+   ```
+5. 아니다. arrayList 로 넣을게 아니라 map형식으로 데이터를 넣자.  
+   배열로 넣으니 객체에 해당하는 값을 빼내기가 쉽지가 않다.  
+   아깝지만 만들어 놓은 ArrayList를 삭제하자..ㅜㅜ
+6. 파라미터를 '=' 로 잘라서 생긴 배열을 tempList 에 세팅했다.  
+   그리고 tempList 의 index 0을 key, index 1을 value 로 map에 세팅해줬다.  
+   ```java
+   Map<String, Object> map = new HashMap<>();
+   for (String s : param) {
+     log.info("param : {}", s);
+     String[] tempList = s.split("=");
+     if (tempList.length > 1) {
+        map.put(tempList[0], tempList[1]);
+     }else{
+       map.put(tempList[0], "");
+     }
+   }
+   log.info("map : {}", map);
+   ```
+   그러면 로그가 아래와 같이 찍힌다.
+   >map : {password=test01, name=, userId=test01, email=}
+7. 위 과정을 더 확실하게 확인하기 위해 단위테스트를 진행하기로 결심했다!!  
+   내 생에 첫! 단위테스트이다ㅎㅎ   
    
-      
 ### 요구사항 3 - post 방식으로 회원가입
 * 
 
