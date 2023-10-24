@@ -50,8 +50,8 @@ Location: /index.html
 ```
 
 ### 요구사항 5 - cookie
-
-*
+* Set-Cookie : <cookie-key>=<cookie-value> 
+* `Path=/` 를 통해 도메인 전역에 쿠키를 설정한다. ex) Set-Cookie : key=value; Path=/
 
 ### 요구사항 6 - stylesheet 적용
 

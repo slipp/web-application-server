@@ -1,5 +1,6 @@
 package webserver;
 
+import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,26 @@ public class RequestHandler extends Thread {
                 String email = queryStringMap.get("email");
                 User user = new User(userId, password, name, email);
                 log.debug("user create {}", user);
-                response302Header(dos);
+                DataBase.addUser(user);
+                redirect(dos, "/index.html");
+            } else if (httpMethod.equals("POST") && requestUrl.equals("/user/login")) {
+                String requestBody = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
+                log.debug("[Request Body] {}", requestBody);
+                Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(requestBody);
+                String userId = queryStringMap.get("userId");
+                String password = queryStringMap.get("password");
+                User user = DataBase.findUserById(userId);
+
+                Map<String, String> responseHeader = new HashMap<>();
+                if (user == null || !user.getPassword().equals(password)) {
+                    // 로그인 실패
+                    responseHeader.put("Set-Cookie", "logined=false; Path=/");
+                    redirect(dos, "/user/login_failed.html", responseHeader);
+                    return;
+                }
+                // 로그인 성공
+                responseHeader.put("Set-Cookie", "logined=true; Path=/");
+                redirect(dos, "/index.html", responseHeader);
             } else {
                 byte[] body = Files.readAllBytes(new File(HTML_FILE_PATH + requestLine[1]).toPath());
                 response200Header(dos, body.length);
@@ -71,7 +91,7 @@ public class RequestHandler extends Thread {
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("HTTP/1.1 200 OK\r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
@@ -80,10 +100,20 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response302Header(DataOutputStream dos) {
+    private void redirect(DataOutputStream dos, String redirectUrl) {
+        redirect(dos, redirectUrl, null);
+    }
+
+    private void redirect(DataOutputStream dos, String redirectUrl, Map<String, String> headers) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found\r\n");
-            dos.writeBytes("Location: /index.html\r\n");
+            dos.writeBytes("Location: " + redirectUrl + "\r\n");
+            if (headers != null && !headers.isEmpty()) {
+                for (String key : headers.keySet()) {
+                    dos.writeBytes(key + ": " + headers.get(key) + "\r\n");
+                }
+            }
+            dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
