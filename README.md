@@ -50,13 +50,9 @@ Location: /index.html
 ```
 
 ### 요구사항 5 - cookie
-* Set-Cookie : <cookie-key>=<cookie-value> 
+* Set-Cookie : \<cookie-key\>=\<cookie-value\> 
 * `Path=/` 를 통해 도메인 전역에 쿠키를 설정한다. ex) Set-Cookie : key=value; Path=/
 
 ### 요구사항 6 - stylesheet 적용
-
-*
-
-### heroku 서버에 배포 후
-
-* 
+* CSS 파일을 브라우저가 인식 할 수 있도록 응답 헤더를 통해 Content-Type 을 알려줘야한다. <br>
+  Content-Type: text/css
