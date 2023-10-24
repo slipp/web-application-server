@@ -4,10 +4,12 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestHandler extends Thread {
@@ -34,17 +36,22 @@ public class RequestHandler extends Thread {
             }
             String[] requestLine = line.split(" ");
 
-            // header 출력
+            // request header
+            Map<String, String> headers = new HashMap<>();
             while ((line = br.readLine()) != null && !line.equals("")) {
-                log.debug("[Header] {}", line);
+                log.debug("[Request Header] {}", line);
+                String[] headerToken = line.split(": ");
+                headers.put(headerToken[0], headerToken[1]);
             }
+
             String httpMethod = requestLine[0];
             String requestUrl = requestLine[1];
+            if (httpMethod.equals("POST") && requestUrl.startsWith("/user/create")) {
+                // request body
+                String requestBody = IOUtils.readData(br, Integer.parseInt(headers.get("Content-Length")));
+                log.debug("[Request Body] {}", requestBody);
 
-            if (httpMethod.equals("GET") && requestUrl.startsWith("/user/create")) {
-                int idx = requestUrl.indexOf("?");
-                String queryString = requestUrl.substring(idx + 1);
-                Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(queryString);
+                Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(requestBody);
                 String userId = queryStringMap.get("userId");
                 String password = queryStringMap.get("password");
                 String name = queryStringMap.get("name");
