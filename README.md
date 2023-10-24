@@ -7,7 +7,7 @@
 # 웹 서버 시작 및 테스트
 * webserver.WebServer 는 사용자의 요청을 받아 RequestHandler에 작업을 위임하는 클래스이다.
 * 사용자 요청에 대한 모든 처리는 RequestHandler 클래스의 run() 메서드가 담당한다.
-* WebServer를 실행한 후 브라우저에서 http://localhost:8080으로 접속해 "Hello World" 메시지가 출력되는지 확인한다.
+* WebServer를 실행한 후 브라우저에서 http://localhost:8080 으로 접속해 "Hello World" 메시지가 출력되는지 확인한다.
 
 # 각 요구사항별 학습 내용 정리
 
@@ -15,7 +15,7 @@
 * 구현을 완료한 후 구현 과정에서 새롭게 알게된 내용, 궁금한 내용을 기록한다.
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다.
 
-### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
+### 요구사항 1 - http://localhost:8080/index.html 로 접속시 응답
 
 * HTTP request message 구조 <br>
   Reqeust Line(http method, request url, http version) <br>
