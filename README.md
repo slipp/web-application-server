@@ -33,6 +33,7 @@
 ````
 
 ### 요구사항 3 - post 방식으로 회원가입
+
 * `<from> 테그`의 method=post 으로 보낼시 request body 에 queryString 형태로 담겨져 온다.
 
 ```code
@@ -41,13 +42,21 @@ userId=jwkim.oa&password=1234&name=JiWon&email=jwkim.oa@gmail.com
 
 ### 요구사항 4 - redirect 방식으로 이동
 
-*
+* Redirect Http response - `Location` header 에 redirect url 을 보낸다.
+
+```code
+HTTP/1.1 302 Found
+Location: /index.html
+```
 
 ### 요구사항 5 - cookie
-* 
+
+*
 
 ### 요구사항 6 - stylesheet 적용
-* 
+
+*
 
 ### heroku 서버에 배포 후
+
 * 
