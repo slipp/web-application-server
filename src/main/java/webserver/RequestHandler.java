@@ -1,10 +1,9 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,29 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            log.info("connection: {}", connection.toString());
+
+            BufferedReader br=new BufferedReader(new InputStreamReader(in));
+            String line=br.readLine();
+
+            if("".equals(line) || line==null){
+                log.info("line is null, return");
+                return;
+            }
+
+            while(!"".equals(line) && line!=null){
+                log.info("line: {}", line);
+
+                if(isIndexPage(line)){
+                    DataOutputStream dos=new DataOutputStream(out);
+                    byte[] body= Files.readAllBytes(Paths.get("./webapp/index.html"));
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+                }
+
+                line=br.readLine();
+            }
+
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = "Hello World".getBytes();
             response200Header(dos, body.length);
@@ -31,6 +53,18 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    // index 페이지를 요청하는지 확인
+    private boolean isIndexPage(String line){
+
+        String[] tokens=line.split(" ");
+
+        if("GET".equals(tokens[0]) && "/index.html".equals(tokens[1])) {
+            return true;
+        }
+
+        return false;
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
