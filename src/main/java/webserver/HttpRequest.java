@@ -22,7 +22,7 @@ enum HttpMethod {
 
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
-    private String uri;
+    private Uri uri;
     private HttpMethod method;
     private Map<String, String> headers = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class HttpRequest {
         String[] splited = line.split(" ");
         System.out.println(Arrays.toString(splited));
         method = HttpMethod.valueOf(splited[0]);
-        uri = splited[1];
+        uri = Uri.from(splited[1]);
     }
 
     private void parseHeaders(List<String> headers) {
@@ -62,7 +62,7 @@ public class HttpRequest {
         return this.method;
     }
 
-    public String getUri() {
+    public Uri getUri() {
         return this.uri;
     }
 }
