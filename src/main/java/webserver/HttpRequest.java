@@ -28,13 +28,9 @@ public class HttpRequest {
     private Map<String, String> body;
     private static final Set<String> staticFileExtensions = Set.of("html", "js", "css");
 
-    private HttpRequest(InputStream in) {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            parseHttpRequest(br);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
+    private HttpRequest(InputStream in) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        parseHttpRequest(br);
     }
 
     public static HttpRequest from(InputStream in) throws IOException {

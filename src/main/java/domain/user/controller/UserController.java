@@ -1,13 +1,10 @@
 package domain.user.controller;
 
-import java.io.IOException;
+import domain.user.model.User;
+import domain.user.service.UserService;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import domain.user.model.User;
-import util.HttpRequestUtils;
 import webserver.Controller;
 import webserver.HttpMethod;
 import webserver.HttpRequest;
@@ -23,6 +20,9 @@ public class UserController implements Controller {
         if (requestPath.equals("/user/create") && request.getMethod() == HttpMethod.POST) {
             return signup(request);
         }
+        if (requestPath.equals("/user/login") && request.getMethod() == HttpMethod.POST) {
+            return login(request);
+        }
         return null;
     }
 
@@ -32,12 +32,22 @@ public class UserController implements Controller {
         String password = requestBody.get("password");
         String name = requestBody.get("name");
         String email = requestBody.get("email");
-
-        User user = User.of(userId, password, name, email);
-
-        log.debug("{} user signup complete", user);
-
+        User user = UserService.signup(userId, password, name, email);
         return HttpResponse.of(HttpStatus.FOUND, user.toString())
             .addHeader("Location", "/index.html");
+    }
+
+    private HttpResponse login(HttpRequest request) {
+        Map<String, String> requestBody = request.getRequestBody();
+        String userId = requestBody.get("userId");
+        String password = requestBody.get("password");
+        if (UserService.login(userId, password)) {
+            return HttpResponse.of(HttpStatus.FOUND)
+                .addHeader("Location", "/index.html")
+                .addHeader("Set-Cookie", "logined=true");
+        }
+        return HttpResponse.of(HttpStatus.FOUND)
+            .addHeader("Location", "/user/login_failed.html")
+            .addHeader("Set-Cookie", "logined=false");
     }
 }

@@ -6,18 +6,11 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.HttpRequestUtils;
-
 public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private final HttpStatus status;
     private final Map<String, String> headers = new HashMap<>();
     private final byte[] body;
-    
-    private HttpResponse(HttpStatus status, String body) {
-        this.status = status;
-        this.body = body.getBytes();
-    }
 
     private HttpResponse(HttpStatus status, byte[] body) {
         this.status = status;
@@ -25,11 +18,15 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(HttpStatus status, String body) {
-        return new HttpResponse(status, body);
+        return new HttpResponse(status, body.getBytes());
     }
 
     public static HttpResponse of(HttpStatus status, byte[] body) {
         return new HttpResponse(status, body);
+    }
+
+    public static HttpResponse of(HttpStatus status) {
+        return new HttpResponse(status, new byte[0]);
     }
 
     public byte[] getBody() {

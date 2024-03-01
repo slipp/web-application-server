@@ -1,18 +1,12 @@
 package webserver;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.io.File;
 
@@ -41,20 +35,19 @@ public class RequestHandler extends Thread {
             connection.getPort());
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-            HttpRequest httpRequest = HttpRequest.from(in);
+            HttpRequest request = HttpRequest.from(in);
             HttpResponse response = HttpResponse.of(HttpStatus.NOT_FOUND, "Not Found");
 
-            if (httpRequest.isStaticFileRequest()) {
-                File file = new File("./webapp" + httpRequest.getRequestPath());
+            if (request.isStaticFileRequest()) {
+                File file = new File("./webapp" + request.getRequestPath());
                 log.debug(file.getAbsolutePath());
                 response = HttpResponse.of(HttpStatus.OK, Files.readAllBytes(file.toPath()));
             } else {
-                String requestPath = httpRequest.getRequestPath();
+                String requestPath = request.getRequestPath();
                 for (String key : controllers.keySet()) {
                     if (requestPath.contains(key)) {
-                        response = controllers.get(key).controll(httpRequest);
+                        response = controllers.get(key).controll(request);
                         break;
                     }
                 }
@@ -66,34 +59,30 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response(DataOutputStream dos, HttpResponse response) {
+    private void response(DataOutputStream dos, HttpResponse response) throws IOException {
         responseHeader(dos, response);
         responseBody(dos, response);
     }
 
-    private void responseHeader(DataOutputStream dos, HttpResponse response) {
+    private void responseHeader(DataOutputStream dos, HttpResponse response) throws IOException {
         HttpStatus status = response.getStatus();
         int lengthOfBodyContent = response.getBody().length;
-        try {
-            dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+        dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
+        dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+        if (lengthOfBodyContent > 0) {
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            for (String header : response.getHeaders().keySet()) {
-                dos.writeBytes(header + ": " + response.getHeaders().get(header) + "\r\n");
-            }
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
         }
+        for (String header : response.getHeaders().keySet()) {
+            dos.writeBytes(header + ": " + response.getHeaders().get(header) + "\r\n");
+        }
+        dos.writeBytes("\r\n");
     }
 
-    private void responseBody(DataOutputStream dos, HttpResponse response) {
+    private void responseBody(DataOutputStream dos, HttpResponse response) throws IOException {
         byte[] body = response.getBody();
-        try {
+        if (body.length > 0) {
             dos.write(body, 0, body.length);
             dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
         }
     }
 }
