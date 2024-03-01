@@ -37,6 +37,7 @@ public class UserController implements Controller {
 
         log.debug("{} user signup complete", user);
 
-        return HttpResponse.of(HttpStatus.CREATED, user.toString());
+        return HttpResponse.of(HttpStatus.FOUND, user.toString())
+            .addHeader("Location", "/index.html");
     }
 }

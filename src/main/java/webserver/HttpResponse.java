@@ -11,8 +11,8 @@ import util.HttpRequestUtils;
 public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private final HttpStatus status;
-    private String headers;
-    private byte[] body = new byte[0];
+    private final Map<String, String> headers = new HashMap<>();
+    private final byte[] body;
     
     private HttpResponse(HttpStatus status, String body) {
         this.status = status;
@@ -38,5 +38,14 @@ public class HttpResponse {
 
     public HttpStatus getStatus() {
         return this.status;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public HttpResponse addHeader(String key, String value) {
+        headers.put(key, value);
+        return this;
     }
 }

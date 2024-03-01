@@ -67,25 +67,28 @@ public class RequestHandler extends Thread {
     }
 
     private void response(DataOutputStream dos, HttpResponse response) {
-        byte[] body = response.getBody();
-        HttpStatus status = response.getStatus();
-
-        responseHeader(dos, status, body.length);
-        responseBody(dos, body);
+        responseHeader(dos, response);
+        responseBody(dos, response);
     }
 
-    private void responseHeader(DataOutputStream dos, HttpStatus status, int lengthOfBodyContent) {
+    private void responseHeader(DataOutputStream dos, HttpResponse response) {
+        HttpStatus status = response.getStatus();
+        int lengthOfBodyContent = response.getBody().length;
         try {
             dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            for (String header : response.getHeaders().keySet()) {
+                dos.writeBytes(header + ": " + response.getHeaders().get(header) + "\r\n");
+            }
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void responseBody(DataOutputStream dos, byte[] body) {
+    private void responseBody(DataOutputStream dos, HttpResponse response) {
+        byte[] body = response.getBody();
         try {
             dos.write(body, 0, body.length);
             dos.flush();
