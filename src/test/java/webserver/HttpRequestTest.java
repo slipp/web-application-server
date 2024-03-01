@@ -26,6 +26,6 @@ public class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.from(in);
 
         assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.valueOf(method));
-        assertThat(httpRequest.getUri()).isEqualTo(uri);
+        assertThat(httpRequest.getUri().getUri()).isEqualTo(uri);
     }
 }

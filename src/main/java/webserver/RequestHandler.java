@@ -1,54 +1,82 @@
 package webserver;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.io.File;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import webserver.user.controller.UserController;
+import domain.user.controller.UserController;
 
 public class RequestHandler extends Thread {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private Socket connection;
-    
+    private final Socket connection;
+
     private static final Map<String, Controller> controllers = new HashMap<>();
+
+    static {
+        controllers.put("/user", new UserController());
+    }
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
-        controllers.put("/user", new UserController());
     }
 
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+            connection.getPort());
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
             HttpRequest httpRequest = HttpRequest.from(in);
-            String requestPath = httpRequest.getUri().getRequestPath();
-            byte[] body = "404 NOT FOUND".getBytes();
-            for (String key: controllers.keySet()) {
-                if (requestPath.contains(key)) {
-                    body = controllers.get(key).controll(httpRequest);
-                    break;
+            HttpResponse response = HttpResponse.of(HttpStatus.NOT_FOUND, "Not Found");
+
+            if (httpRequest.isStaticFileRequest()) {
+                File file = new File("./webapp" + httpRequest.getRequestPath());
+                log.debug(file.getAbsolutePath());
+                response = HttpResponse.of(HttpStatus.OK, Files.readAllBytes(file.toPath()));
+            } else {
+                String requestPath = httpRequest.getRequestPath();
+                for (String key : controllers.keySet()) {
+                    if (requestPath.contains(key)) {
+                        response = controllers.get(key).controll(httpRequest);
+                        break;
+                    }
                 }
             }
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+
+            response(dos, response);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response(DataOutputStream dos, HttpResponse response) {
+        byte[] body = response.getBody();
+        HttpStatus status = response.getStatus();
+
+        responseHeader(dos, status, body.length);
+        responseBody(dos, body);
+    }
+
+    private void responseHeader(DataOutputStream dos, HttpStatus status, int lengthOfBodyContent) {
         try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
