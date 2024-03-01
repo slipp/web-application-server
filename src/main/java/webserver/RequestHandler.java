@@ -1,19 +1,15 @@
 package webserver;
 
+import domain.user.controller.UserController;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import domain.user.controller.UserController;
 
 public class RequestHandler extends Thread {
 
@@ -40,9 +36,7 @@ public class RequestHandler extends Thread {
             HttpResponse response = HttpResponse.of(HttpStatus.NOT_FOUND, "Not Found");
 
             if (request.isStaticFileRequest()) {
-                File file = new File("./webapp" + request.getRequestPath());
-                log.debug(file.getAbsolutePath());
-                response = HttpResponse.of(HttpStatus.OK, Files.readAllBytes(file.toPath()));
+                response = StaticFileController.controll(request);
             } else {
                 String requestPath = request.getRequestPath();
                 for (String key : controllers.keySet()) {
@@ -66,12 +60,7 @@ public class RequestHandler extends Thread {
 
     private void responseHeader(DataOutputStream dos, HttpResponse response) throws IOException {
         HttpStatus status = response.getStatus();
-        int lengthOfBodyContent = response.getBody().length;
         dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
-        dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-        if (lengthOfBodyContent > 0) {
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-        }
         for (String header : response.getHeaders().keySet()) {
             dos.writeBytes(header + ": " + response.getHeaders().get(header) + "\r\n");
         }
