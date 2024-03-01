@@ -71,7 +71,7 @@ public class RequestHandler extends Thread {
         byte[] body = response.getBody();
         if (body.length > 0) {
             dos.write(body, 0, body.length);
-            dos.flush();
         }
+        dos.flush();
     }
 }
