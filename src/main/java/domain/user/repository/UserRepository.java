@@ -2,7 +2,7 @@ package domain.user.repository;
 
 import com.google.common.collect.Maps;
 import domain.user.model.User;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class UserRepository {
@@ -16,8 +16,8 @@ public class UserRepository {
         return users.get(userId);
     }
 
-    public static Collection<User> findAll() {
-        return users.values();
+    public static List<User> findAll() {
+        return users.values().stream().toList();
     }
 
     public static void deleteAll() {

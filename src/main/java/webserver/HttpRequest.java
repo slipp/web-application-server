@@ -99,4 +99,8 @@ public class HttpRequest {
         }
         return false;
     }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 }

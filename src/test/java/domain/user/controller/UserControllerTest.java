@@ -101,4 +101,45 @@ class UserControllerTest {
         assertThat(response.getHeaders().get("Set-Cookie")).isEqualTo("logined=false");
         assertThat(response.getHeaders().get("Location")).isEqualTo("/user/login_failed.html");
     }
+
+    @Test
+    void getUserList() throws IOException {
+        // given
+        InputStream in = new ByteArrayInputStream("""
+            GET /user/list HTTP/1.1
+            Host: localhost:8080
+            Connection: keep-alive
+            Accept: */*
+            Cookie: logined=true
+            
+            """.getBytes());
+        HttpRequest request = HttpRequest.from(in);
+
+        //when
+        HttpResponse response = userController.controll(request);
+
+        //then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(UserRepository.findAll().toString().getBytes());
+    }
+
+    @Test
+    void getUserList_fail() throws IOException {
+        // given
+        InputStream in = new ByteArrayInputStream("""
+            GET /user/list HTTP/1.1
+            Host: localhost:8080
+            Connection: keep-alive
+            Accept: */*
+            
+            """.getBytes());
+        HttpRequest request = HttpRequest.from(in);
+
+        //when
+        HttpResponse response = userController.controll(request);
+
+        //then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
+        assertThat(response.getHeaders().get("Location")).isEqualTo("/user/login.html");
+    }
 }

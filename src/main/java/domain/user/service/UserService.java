@@ -2,6 +2,7 @@ package domain.user.service;
 
 import domain.user.model.User;
 import domain.user.repository.UserRepository;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,10 @@ public class UserService {
         UserRepository.save(user);
         log.debug("{} user signup complete", user);
         return user;
+    }
+
+    public static List<User> getUserList() {
+        return UserRepository.findAll();
     }
 
     public static boolean login(String userId, String password) {

@@ -5,6 +5,7 @@ import domain.user.service.UserService;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 import webserver.Controller;
 import webserver.HttpMethod;
 import webserver.HttpRequest;
@@ -22,6 +23,9 @@ public class UserController implements Controller {
         }
         if (requestPath.equals("/user/login") && request.getMethod() == HttpMethod.POST) {
             return login(request);
+        }
+        if (requestPath.equals("/user/list") && request.getMethod() == HttpMethod.GET) {
+            return getUserList(request);
         }
         return null;
     }
@@ -49,5 +53,13 @@ public class UserController implements Controller {
         return HttpResponse.of(HttpStatus.FOUND)
             .addHeader("Location", "/user/login_failed.html")
             .addHeader("Set-Cookie", "logined=false");
+    }
+
+    private HttpResponse getUserList(HttpRequest request) {
+        Map<String, String> cookies = HttpRequestUtils.parseCookies(request.getHeaders().get("Cookie"));
+        if ("true".equals(cookies.get("logined"))) {
+            return HttpResponse.of(HttpStatus.OK, UserService.getUserList().toString());
+        }
+        return HttpResponse.of(HttpStatus.FOUND).addHeader("Location", "/user/login.html");
     }
 }
