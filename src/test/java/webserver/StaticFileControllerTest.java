@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import webserver.http.response.HttpResponse;
+import webserver.http.request.HttpRequest;
 
 class StaticFileControllerTest {
 
@@ -30,7 +32,7 @@ class StaticFileControllerTest {
         HttpResponse response = StaticFileController.controll(httpRequest);
 
         // then
-        assertThat(response.getHeaders().get("Content-Type")).isEqualTo("text/html;charset=utf-8");
+        assertThat(response.getHeader("Content-Type").orElseThrow()).isEqualTo("text/html;charset=utf-8");
     }
 
     @Test
@@ -55,6 +57,6 @@ class StaticFileControllerTest {
         HttpResponse response = StaticFileController.controll(httpRequest);
 
         // then
-        assertThat(response.getHeaders().get("Content-Type")).isEqualTo("text/css;charset=utf-8");
+        assertThat(response.getHeader("Content-Type").orElseThrow()).isEqualTo("text/css;charset=utf-8");
     }
 }

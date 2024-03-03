@@ -2,22 +2,20 @@ package domain.user.controller;
 
 import domain.user.model.User;
 import domain.user.service.UserService;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.HttpRequestUtils;
 import webserver.Controller;
-import webserver.HttpMethod;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
-import webserver.HttpStatus;
+import webserver.http.HttpMethod;
+import webserver.http.HttpStatus;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
 
 public class UserController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Override
     public HttpResponse controll(HttpRequest request) {
-        String requestPath = request.getRequestPath();
+        String requestPath = request.getPath();
         if (requestPath.equals("/user/create") && request.getMethod() == HttpMethod.POST) {
             return signup(request);
         }
@@ -31,33 +29,41 @@ public class UserController implements Controller {
     }
 
     private HttpResponse signup(HttpRequest request) {
-        Map<String, String> requestBody = request.getRequestBody();
-        String userId = requestBody.get("userId");
-        String password = requestBody.get("password");
-        String name = requestBody.get("name");
-        String email = requestBody.get("email");
-        User user = UserService.signup(userId, password, name, email);
-        return HttpResponse.of(HttpStatus.FOUND, user.toString())
-            .addHeader("Location", "/index.html");
+        try {
+            String userId = request.getBody().getParameter("userId");
+            String password = request.getBody().getParameter("password");
+            String name = request.getBody().getParameter("name");
+            String email = request.getBody().getParameter("email");
+            User user = UserService.signup(userId, password, name, email);
+            return HttpResponse.of(HttpStatus.FOUND, user.toString())
+                .addHeader("Location", "/index.html");
+        } catch (IllegalArgumentException e) {
+            return HttpResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     private HttpResponse login(HttpRequest request) {
-        Map<String, String> requestBody = request.getRequestBody();
-        String userId = requestBody.get("userId");
-        String password = requestBody.get("password");
-        if (UserService.login(userId, password)) {
+        try {
+            String userId = request.getBody().getParameter("userId");
+            String password = request.getBody().getParameter("password");
+            if (UserService.login(userId, password)) {
+                return HttpResponse.of(HttpStatus.FOUND)
+                    .addHeader("Location", "/index.html")
+                    .addHeader("Set-Cookie", "logined=true");
+            }
             return HttpResponse.of(HttpStatus.FOUND)
-                .addHeader("Location", "/index.html")
-                .addHeader("Set-Cookie", "logined=true");
+                .addHeader("Location", "/user/login_failed.html")
+                .addHeader("Set-Cookie", "logined=false");
+        } catch (IllegalArgumentException e) {
+            return HttpResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return HttpResponse.of(HttpStatus.FOUND)
-            .addHeader("Location", "/user/login_failed.html")
-            .addHeader("Set-Cookie", "logined=false");
     }
 
     private HttpResponse getUserList(HttpRequest request) {
-        Map<String, String> cookies = HttpRequestUtils.parseCookies(request.getHeaders().get("Cookie"));
-        if ("true".equals(cookies.get("logined"))) {
+        boolean logined = request.getCookie("logined")
+            .map("true"::equals)
+            .orElse(false);
+        if (logined) {
             return HttpResponse.of(HttpStatus.OK, UserService.getUserList().toString());
         }
         return HttpResponse.of(HttpStatus.FOUND).addHeader("Location", "/user/login.html");

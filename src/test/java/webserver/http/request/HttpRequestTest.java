@@ -1,4 +1,4 @@
-package webserver;
+package webserver.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,11 +6,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;
+import webserver.http.HttpMethod;
 
 public class HttpRequestTest {
 
     @Test
-    public void from() throws IOException {
+    public void parse() throws IOException {
         String method = "GET";
         String requestPath = "/request-path";
         String queryString = "?key=value";
@@ -30,6 +31,9 @@ public class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.from(in);
 
         assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.valueOf(method));
-        assertThat(httpRequest.getRequestPath()).isEqualTo(requestPath);
+        assertThat(httpRequest.getPath()).isEqualTo(requestPath);
+        assertThat(httpRequest.getHeader("Host").orElse("")).isEqualTo(host);
+        assertThat(httpRequest.getHeader("Connection").orElse("")).isEqualTo("keep-alive");
+        assertThat(httpRequest.getHeader("Accept").orElse("")).isEqualTo("*/*");
     }
 }

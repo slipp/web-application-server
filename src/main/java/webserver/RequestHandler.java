@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import webserver.http.HttpStatus;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
 
 public class RequestHandler extends Thread {
 
@@ -38,7 +41,7 @@ public class RequestHandler extends Thread {
             if (request.isStaticFileRequest()) {
                 response = StaticFileController.controll(request);
             } else {
-                String requestPath = request.getRequestPath();
+                String requestPath = request.getPath();
                 for (String key : controllers.keySet()) {
                     if (requestPath.contains(key)) {
                         response = controllers.get(key).controll(request);
@@ -47,31 +50,9 @@ public class RequestHandler extends Thread {
                 }
             }
 
-            response(dos, response);
+            response.send(dos);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void response(DataOutputStream dos, HttpResponse response) throws IOException {
-        responseHeader(dos, response);
-        responseBody(dos, response);
-    }
-
-    private void responseHeader(DataOutputStream dos, HttpResponse response) throws IOException {
-        HttpStatus status = response.getStatus();
-        dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.code(), status.value()));
-        for (String header : response.getHeaders().keySet()) {
-            dos.writeBytes(header + ": " + response.getHeaders().get(header) + "\r\n");
-        }
-        dos.writeBytes("\r\n");
-    }
-
-    private void responseBody(DataOutputStream dos, HttpResponse response) throws IOException {
-        byte[] body = response.getBody();
-        if (body.length > 0) {
-            dos.write(body, 0, body.length);
-        }
-        dos.flush();
     }
 }

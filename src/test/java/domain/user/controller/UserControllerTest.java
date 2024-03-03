@@ -10,9 +10,9 @@ import java.io.InputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import webserver.HttpRequest;
-import webserver.HttpResponse;
-import webserver.HttpStatus;
+import webserver.http.HttpStatus;
+import webserver.http.request.HttpRequest;
+import webserver.http.response.HttpResponse;
 
 class UserControllerTest {
 
@@ -39,7 +39,7 @@ class UserControllerTest {
             Content-Length: %d
             Content-Type: application/x-www-form-urlencoded
             Accept: */*
-            
+                        
             %s
             """, body.length(), body).getBytes());
         HttpRequest request = HttpRequest.from(in);
@@ -49,7 +49,9 @@ class UserControllerTest {
 
         //then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getHeaders().get("Location")).isEqualTo("/index.html");
+        assertThat(
+            response.getHeader("Location").orElseThrow())
+            .isEqualTo("/index.html");
     }
 
     @Test
@@ -63,7 +65,7 @@ class UserControllerTest {
             Content-Length: %d
             Content-Type: application/x-www-form-urlencoded
             Accept: */*
-            
+                        
             %s
             """, body.length(), body).getBytes());
         HttpRequest request = HttpRequest.from(in);
@@ -73,8 +75,12 @@ class UserControllerTest {
 
         //then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getHeaders().get("Set-Cookie")).isEqualTo("logined=true");
-        assertThat(response.getHeaders().get("Location")).isEqualTo("/index.html");
+        assertThat(
+            response.getHeader("Set-Cookie").orElseThrow())
+            .isEqualTo("logined=true");
+        assertThat(
+            response.getHeader("Location").orElseThrow())
+            .isEqualTo("/index.html");
     }
 
     @Test
@@ -88,7 +94,7 @@ class UserControllerTest {
             Content-Length: %d
             Content-Type: application/x-www-form-urlencoded
             Accept: */*
-            
+                        
             %s
             """, body.length(), body).getBytes());
         HttpRequest request = HttpRequest.from(in);
@@ -98,8 +104,12 @@ class UserControllerTest {
 
         //then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getHeaders().get("Set-Cookie")).isEqualTo("logined=false");
-        assertThat(response.getHeaders().get("Location")).isEqualTo("/user/login_failed.html");
+        assertThat(
+            response.getHeader("Set-Cookie").orElseThrow())
+            .isEqualTo("logined=false");
+        assertThat(
+            response.getHeader("Location").orElseThrow())
+            .isEqualTo("/user/login_failed.html");
     }
 
     @Test
@@ -111,7 +121,7 @@ class UserControllerTest {
             Connection: keep-alive
             Accept: */*
             Cookie: logined=true
-            
+                        
             """.getBytes());
         HttpRequest request = HttpRequest.from(in);
 
@@ -131,7 +141,7 @@ class UserControllerTest {
             Host: localhost:8080
             Connection: keep-alive
             Accept: */*
-            
+                        
             """.getBytes());
         HttpRequest request = HttpRequest.from(in);
 
@@ -140,6 +150,8 @@ class UserControllerTest {
 
         //then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getHeaders().get("Location")).isEqualTo("/user/login.html");
+        assertThat(
+            response.getHeader("Location").orElseThrow())
+            .isEqualTo("/user/login.html");
     }
 }
