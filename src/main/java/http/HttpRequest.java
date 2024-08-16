@@ -19,6 +19,14 @@ public class HttpRequest {
 	
 	private RequestParams requestParams = new RequestParams();
 
+	public HttpSession getSession() {
+		return HttpSessions.getSession(getCookies().getCookie("JSESSIONID"));
+	}
+
+	public HttpCookie getCookies() {
+		return new HttpCookie(getHeader("Cookie"));
+	}
+
 	public HttpRequest(InputStream is) {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
