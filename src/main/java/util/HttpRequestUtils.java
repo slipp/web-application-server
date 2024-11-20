@@ -1,5 +1,11 @@
 package util;
 
+import model.User;
+import db.DataBase;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,6 +14,44 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
+
+    public static String headerRequest(InputStream in) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String line = reader.readLine();
+
+        if (line == null) { return null; }
+
+        String url = line.split(" ")[1];
+        System.out.println(line);
+
+        //if (!url.endsWith(".html")) {return null;}
+
+        /*while (!"".equals(line)) {
+            if (line == null) { return null; }
+            System.out.println(line);
+            line = reader.readLine();
+        }*/
+        return url;
+    }
+
+    public static String parseUrl(String url) {
+        int index = url.indexOf("?");
+        String requestPath = url.substring(0, index);
+        return url.substring(index+1);
+
+    }
+
+    public static void signUpRequest(String url) {
+        String params = parseUrl(url);
+        Map<String, String> map = parseQueryString(params);
+        User user = new User(
+            map.get("userId"),
+            map.get("password"),
+            map.get("name"),
+            map.get("email")
+        );
+    }
+
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
@@ -18,8 +62,7 @@ public class HttpRequestUtils {
     }
 
     /**
-     * @param 쿠키
-     *            값은 name1=value1; name2=value2 형식임
+     * @param 쿠키 값은 name1=value1; name2=value2 형식임
      * @return
      */
     public static Map<String, String> parseCookies(String cookies) {
